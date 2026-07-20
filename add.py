@@ -3,5 +3,5 @@ st.title("카운터 앱")
 if 'count' not in st. session_state:
   st.session_state.count = 0
 if st.button("증가"):
-  st.session_state.count += 1
+  st.session_state.count += 1000
 st.markdown(f"## 현제 숫자:`{st.session_state.count}`")
