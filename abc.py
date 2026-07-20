@@ -35,3 +35,19 @@ with tab2:
     acc = st.multiselect("액세서리 추가", ["모자", "안경", "목걸이", "가방"])
     with st.expander("액세서리 스타일링 팁 보기"):
         st.warning("너무 많은 액세서리는 투머치가 될 수 있어요.")
+st.markdown("---")\
+if st.button("코디 완성하기"):
+  with st.container(boader=Ture):
+    st.subheader(f"{user_name}님의 오늘의 룩북")
+    st.write(f"오늘같은 **{weater}** 날씨에는 이렇게 입어보세요!")
+    st.markdown(f"""
+    * **상의**{top_color}{top_type}
+    * **하의**{bottom_color}{cottom_type}
+    * **매칭**{shoes}와{','.join(acc) if acc else '아세서리 없이 깔끔하게'}
+    """)
+    st.success("오늘의 스타이링이 와성되었읍니다! 자신 있게 외출하세요!")
+    
+    with st.expander("코디 연출 팁 영상보기"):
+      st.vidio("")
+      st.write("전문가가 제안하는 코디 연출법을 참고해 보세요")
+    
