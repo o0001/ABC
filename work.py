@@ -21,7 +21,7 @@ with col2:
         if st.session_state.start_time != 0:
             st.session_state.end_time = time.time()
             # 걸린 시간 계산 (종료 시간 - 시작 시간)
-            st.session_state.result = st.session_state.endtime - st.session_state.start_time
+            st.session_state.result = st.session_state.end_time - st.session_state.start_time
         else:
             st.warning("시작 버튼을 먼저 눌러주세요!")
 
