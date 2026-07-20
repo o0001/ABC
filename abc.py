@@ -48,6 +48,6 @@ if st.button("코디 완성하기"):
     st.success("오늘의 스타이링이 와성되었읍니다! 자신 있게 외출하세요!")
     
     with st.expander("코디 연출 팁 영상보기"):
-      st.vidio("")
+      st.vidio("https://www.youtube.com/watch?v=_E1cYx6P2h4")
       st.write("전문가가 제안하는 코디 연출법을 참고해 보세요")
     
