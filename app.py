@@ -9,4 +9,4 @@ if st.button("conform"):
     if passwd == "123":
       st.success("ture")
   else:
-    st.error("wrong password or user id")
+    st.error("wrong user id or password")
