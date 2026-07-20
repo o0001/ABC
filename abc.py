@@ -7,5 +7,5 @@ with col1:
   top_color = st.select_slider()
 with col2:
   st.subheader
-  bottom_type
-  bottom_color
+  bottom_type = st.radio()
+  bottom_color =st.select_slider()
