@@ -35,7 +35,7 @@ with tab2:
     acc = st.multiselect("액세서리 추가", ["모자", "안경", "목걸이", "가방"])
     with st.expander("액세서리 스타일링 팁 보기"):
         st.warning("너무 많은 액세서리는 투머치가 될 수 있어요.")
-st.markdown("---")\
+st.markdown("---")
 if st.button("코디 완성하기"):
   with st.container(boader=Ture):
     st.subheader(f"{user_name}님의 오늘의 룩북")
