@@ -1,5 +1,5 @@
 import streamlit as st
-st.tilte("카운터 앱")
+st.title("카운터 앱")
 count = 0
 if st.button("증가"):
   count = count + 1
