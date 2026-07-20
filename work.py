@@ -10,7 +10,6 @@ if 'start_time' not in st.session_state:
 
 st.title("10초 맞추기 게임!")
 st.write("시작 버튼을 누르고, 마음속으로 10초를 센 뒤 종료 버튼을 누르세요.")
-st.write(f"{time.time}")
 col1, col2 = st.columns(2)
 with col1:
     if st.button("시작"):
@@ -24,6 +23,8 @@ with col2:
             st.session_state.result = st.session_state.end_time - st.session_state.start_time
         else:
             st.warning("시작 버튼을 먼저 눌러주세요!")
+
+st.write(f"{st.session_state.end_time - st.session_state.start_time}")
 
 if st.session_state.end_time != 0:
     diff = st.session_state.result
