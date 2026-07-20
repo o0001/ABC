@@ -1,4 +1,5 @@
 import streamlit as st
+
 with st.sidebar:
   st.header("프로필")
   user_name = st.text_input("닉네임")
