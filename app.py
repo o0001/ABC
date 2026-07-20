@@ -9,5 +9,6 @@ text = st.text_area("소감",placeholder="소감입니다.")
 if st.button("질문 전송하기"):
     st.success(f" {user_id}/{greade}한년/{cls}반/{level}")
     st.markdown(f"""
-
-    """)
+    점수:
+    """)]
+    st.info("소감:{text}")
