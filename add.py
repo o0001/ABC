@@ -4,4 +4,4 @@ if 'count' not in st. session_state:
   st.session_state.count = 0
 if st.button("증가"):
   st.session_state.count += 1
-st.markdown(f"## 현제 숫자:`{count}`")
+st.markdown(f"## 현제 숫자:`{st.session_state.count}`")
