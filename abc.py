@@ -11,7 +11,7 @@ st.title("👗 AI 코디 메이커")
 st.write("사이드바에서 날씨를 먼저 선택하고 코디를 시작하세요")
 st.header("👕 아이템 조합하기")
 
-col1, col2 = st.tabs(2)
+col1, col2 = st.tabs("상의","하의")
 with col1:
   st.subheader("상의")
   top_type = st.radio("종류",["후드티","셔츠","맨투맨","반팔티셔츠"])
