@@ -1,7 +1,6 @@
 import streamlit as st
 st.title("카운터 앱")
 count = 0
-x = 0
 count = x
 st.markdown(f"## 현제 숫자:`{count}`")
 if st.button("증가"):
