@@ -21,11 +21,11 @@ with col2:
   bottom_type = st.radio("종류",["청바지","슬랙스","트레이닝 팬츠","반바지"])
   bottom_color =st.select_slider("핏(fit)",options=["슬림","레귤러","오버핏"])
 tab1, tab2 = st.tabs(["상의","하의"])
-with col1:
+with tab1:
   st.subheader("상의")
   top_type = st.radio("종류",["후드티","셔츠","맨투맨","반팔티셔츠"])
   top_color = st.select_slider("색상 톤",options=["밝음","무난함","어두움"])
-with col2:
+with tab2:
   st.subheader("하의")
   bottom_type = st.radio("종류",["청바지","슬랙스","트레이닝 팬츠","반바지"])
   bottom_color =st.select_slider("핏(fit)",options=["슬림","레귤러","오버핏"])
