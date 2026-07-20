@@ -7,7 +7,7 @@ level = st.select_slider("난이도", ["쉬움","보통","어려움"])
 num = st.slider("점수",0,100,50)
 text = st.text_area("소감",placeholder="소감입니다.")
 if st.button("질문 전송하기"):
-    st.success(f" {user_id}/{greade}한년/{cls}반/{level}")
+    st.success(f" {user_id}/{greade}학년/{cls}반/{level}")
     st.markdown(f"""
     점수:
     """)
