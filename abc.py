@@ -1,5 +1,5 @@
 import streamlit as st
-if st.button(>>):
+if st.button(">>"):
   with st.sidebar:
     st.header("프로필")
     user_name = st.text_input("닉네임")
