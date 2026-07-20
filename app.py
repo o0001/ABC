@@ -11,4 +11,4 @@ if st.button("질문 전송하기"):
     st.markdown(f"""
     점수:
     """)
-    st.info("소감:{text}")
+    st.info(f"소감:{text}")
