@@ -9,6 +9,7 @@ def reset_all():
   st.session_state.bottom_color = "슬림"
   st.session_state.shoes = "스니커즈"
   st.session_state.acc = []
+  
 with st.sidebar:
   st.header("프로필")
   user_name = st.text_input("닉네임")
