@@ -17,7 +17,7 @@ with col1:
         st.session_state.end_time = 0          # 종료 시간 초기화
 A = time.time()
 B = st.session_state.start_time-A
-st.write(f"{st.session_state.start_time-A})
+st.write(f"{B})
 with col2:
     if st.button("종료"):
         if st.session_state.start_time != 0:
