@@ -1,12 +1,17 @@
 import streamlit as st
 
-st.markdown("# login page")
-st.markdown("### please input password")
-UID = st.text_input("username")
-passwd = st.text_input("password")
-if st.button("conform"):
-  if UID == "123":
-    if passwd == "123":
-      st.success("ture")
-  else:
-    st.error("wrong user id or password")
+st.markdown("이름")
+user_id = st.text_input("아이디(ID)를 입력하세요", placeholder="example_user")
+st.markdown("")
+
+st.markdown("")
+
+st.markdown("")
+
+st.markdown("")
+
+st.markdown("")
+
+st.markdown("")
+
+st.markdown("")
