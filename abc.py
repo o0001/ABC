@@ -42,7 +42,7 @@ if st.button("코디 완성하기"):
     st.write(f"오늘같은 **{weather}** 날씨에는 이렇게 입어보세요!")
     st.markdown(f"""
     * **상의**{top_color}{top_type}
-    * **하의**{bottom_color}{cottom_type}
+    * **하의**{bottom_color}{bottom_type}
     * **매칭**{shoes}와{','.join(acc) if acc else '아세서리 없이 깔끔하게'}
     """)
     st.success("오늘의 스타이링이 와성되었읍니다! 자신 있게 외출하세요!")
