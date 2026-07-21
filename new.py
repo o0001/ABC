@@ -9,6 +9,10 @@ def page_ai_coach():
         st.session_state.messages = [
             {"role": "system", "content":"너는 사용자의 할 일 목록과 달성정도를 분석하여 조연하는 열정적인 코치야, 사용자가 더 멋진 삶을할 수 이쑈도록 멸화학 조연과 응원해줘. "}
         ]
+    for message in st.session_state.messages:
+        if message["role"] != "system":
+            with st.chat_message(message["role"]):
+                st.markdown(message[content])
     prompt = st.text_input("질문을 입력하세요")
     if st.button("보내기"):
         response = ai_client.responses.create(
