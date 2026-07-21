@@ -39,7 +39,7 @@ def pg2():
         with col_status:
             if st.session_state.todo_list[i][1]:
                 st.write("✅ **달성!**")
-    st.markdown("---")
+st.markdown("---")
 def pg3():
     st.header("📈 3. 나의 갓생 지수")
     if not st.session_state.todo_list:
