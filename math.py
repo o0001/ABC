@@ -254,7 +254,10 @@ class AIChatPage(PageBase):
     
     def run(self):
         st.header(f"{self.icon} AI 수학 조교")
-        if not openai.api_key:
+        
+        # API Key 설정 확인
+        current_api_key = openai.api_key or os.environ.get("OPENAI_API_KEY")
+        if not current_api_key or current_api_key == "[OPENAI_API_KEY]":
             st.warning("유효한 OpenAI API Key를 사이드바에 입력해주세요.")
             return
         
@@ -297,12 +300,11 @@ class AIChatPage(PageBase):
         </style>
         """, unsafe_allow_html=True)
         
-        # 채팅 기록 표시 (사용자 정의 HTML 버블)
+        # 채팅 기록 표시
         chat_html = '<div class="chat-container">'
         for msg in st.session_state.messages:
             if msg["role"] == "user":
                 content = msg["content"]
-                # content가 리스트(이미지 포함)인 경우 텍스트 부분 추출
                 if isinstance(content, list):
                     text_part = next((item["text"] for item in content if item["type"] == "text"), "")
                     chat_html += f'<div class="user-msg">{text_part}<br><small style="color:gray;">[이미지 포함]</small></div>'
@@ -312,22 +314,11 @@ class AIChatPage(PageBase):
                 chat_html += f'<div class="assistant-msg">{msg["content"]}</div>'
         chat_html += '</div><div class="clearfix"></div>'
         st.markdown(chat_html, unsafe_allow_html=True)
-        # 공식 st.chat_message를 대안으로 사용 가능 (위의 사용자 정의 블록을 주석 처리하고 아래 사용)
-        # for msg in st.session_state.messages:
-        #     with st.chat_message(msg["role"]):
-        #         if isinstance(msg["content"], list):
-        #             for part in msg["content"]:
-        #                 if part["type"] == "text":
-        #                     st.markdown(part["text"])
-        #                 elif part["type"] == "image_url":
-        #                     st.image(part["image_url"]["url"])
-        #         else:
-        #             st.markdown(msg["content"])
         
         # 입력 영역
         with st.form("chat_form", clear_on_submit=True):
             user_text = st.text_area("질문 입력", value=prompt, height=100, 
-                                     placeholder="예: 리만 가설 설명, 이 적분 풀어주세요...")
+                                   placeholder="예: 리만 가설 설명, 이 적분 풀어주세요...")
             uploaded_img = st.file_uploader("📎 이미지 첨부 (선택)", type=["png", "jpg", "jpeg"])
             submitted = st.form_submit_button("📨 전송")
         
@@ -345,8 +336,12 @@ class AIChatPage(PageBase):
             
             with st.spinner("🤔 생각 중..."):
                 try:
-                    response = openai.ChatCompletion.create(
-                        model="gpt-5.4-mini",
+                    # 최신 openai 패키지(>=1.0.0) 클라이언트 초기화 방식 적용
+                    from openai import OpenAI
+                    client = OpenAI(api_key=current_api_key)
+                    
+                    response = client.chat.completions.create(
+                        model="gpt-4o",  # 또는 gpt-4o-mini 등 사용 가능한 모델명
                         messages=st.session_state.messages,
                         max_tokens=1024,
                         temperature=0.7
@@ -362,7 +357,6 @@ class AIChatPage(PageBase):
             if st.button("🗑️ 대화 초기화", use_container_width=True):
                 st.session_state.messages = []
                 st.rerun()
-
 # ---------- 메인 프로그램 ----------
 def main():
     st.set_page_config(page_title="수학 학습 도우미", page_icon="📐", layout="wide")
