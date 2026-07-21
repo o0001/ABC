@@ -1,5 +1,2 @@
 streamlit
 openai
-base64
-datetime
-pandas
