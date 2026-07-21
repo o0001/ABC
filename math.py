@@ -25,7 +25,7 @@ def init_session():
         "notes": [],
         "messages": [],
         "ai_prompt": "",
-        "system_prompt": "너는 친절한 수학 조교야. 답변은 간결하고 명확하게, 수식은 LaTeX로 표시해줘. 예: $E=mc^2$. 사용자가 채널이나 플레이리스트, 혹은 개념 링크를 추가해달라고 요청하면 도구를 사용해 자동으로 추가해줘.",
+        "system_prompt": "너는 친절하고 유능한 수학 조교야. 답변은 간결하고 명확하게, 수식은 LaTeX로 표시해줘. 예: $E=mc^2$. 사용자가 유튜브 플레이리스트나 채널, 웹사이트 링크를 추가해달라고 요청하면, '인터넷 검색을 못 한다'고 거절하지 말고, 사용자가 제공한 URL과 제목을 바탕으로 즉시 도구(add_wiki_link 등)를 호출하여 앱에 자동으로 추가해줘.",
         "wiki_links": [
             {"id": str(uuid.uuid4()), "title": "대수학", "url": "https://en.wikipedia.org/wiki/Algebra"},
             {"id": str(uuid.uuid4()), "title": "기하학", "url": "https://en.wikipedia.org/wiki/Geometry"},
@@ -549,7 +549,7 @@ class AIChatPage(PageBase):
             col1, col2 = st.columns([5, 1])
             with col1:
                 user_text = st.text_area("질문", value=prompt, height=80,
-                                         placeholder="수학 질문이나 '위키에 링크 추가해줘' 등을 입력하세요", key="chat_input")
+                                         placeholder="수학 질문이나 '이 링크를 위키에 추가해줘' 등을 입력하세요", key="chat_input")
             with col2:
                 uploaded = st.file_uploader("📎", type=["png","jpg","jpeg"], label_visibility="collapsed")
             submitted = st.form_submit_button("전송")
@@ -590,7 +590,6 @@ class AIChatPage(PageBase):
                         
                         # AI가 도구 호출을 요구한 경우
                         if response_message.tool_calls:
-                            # 1. assistant 메시지 기록 추가 (딕셔너리 형태로 안전하게 변환)
                             tool_calls_serialized = [
                                 {
                                     "id": tc.id,
@@ -607,7 +606,6 @@ class AIChatPage(PageBase):
                                 "tool_calls": tool_calls_serialized
                             })
                             
-                            # 2. 각 도구 실행 및 결과 추가
                             for tc in response_message.tool_calls:
                                 tool_result = execute_tool_call(tc.function.name, tc.function.arguments)
                                 st.session_state.messages.append({
@@ -617,7 +615,6 @@ class AIChatPage(PageBase):
                                     "content": tool_result
                                 })
                             
-                            # 3. 도구 실행 결과를 포함하여 최종 답변 생성
                             second_response = client.chat.completions.create(
                                 model="gpt-4o",
                                 messages=st.session_state.messages,
@@ -673,7 +670,6 @@ def main():
     )
     if new_prompt != st.session_state.system_prompt:
         st.session_state.system_prompt = new_prompt
-        # 시스템 프롬프트 변경 시 메시지 목록의 첫 번째 항목 업데이트
         if st.session_state.messages and st.session_state.messages[0].get("role") == "system":
             st.session_state.messages[0]["content"] = new_prompt
     
