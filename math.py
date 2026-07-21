@@ -92,7 +92,7 @@ def safe_image_to_base64(image_file):
         return None
     return base64.b64encode(image_file.read()).decode("utf-8")
 
-# ---------- LaTeX 심볼 도우미 (앞뒤로 $ 기호 추가) ----------
+# ---------- LaTeX 심볼 도우미 ----------
 def latex_symbol_buttons(target_key="note_text"):
     cols = st.columns(5)
     symbols = [
@@ -279,7 +279,9 @@ $f'(x)=2x$"""
                         elif calc_type == "미분":
                             res = sp.diff(e, x)
                         elif calc_type == "적분":
-                            res = sp.integrate(e, x)
+                            # 적분 결과에 적분 상수 C 추가
+                            C = sp.Symbol('C')
+                            res = sp.integrate(e, x) + C
                         else:
                             if "=" in expr:
                                 l, r = expr.split("=")
