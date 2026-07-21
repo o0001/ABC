@@ -15,11 +15,6 @@ def add_todo():
 
 @st.dialog("오늘의 다짐 수정")
 def edm():
-    motto = st.text_input("나의 한 줄 좌우명을 적어주세요")
-    if st.button("다짐저장"):
-        st.session_state.user_motto = motto
-        st.session_state.motto_updated = True
-        st.rerun()
 
 def page_motto():
     st.title("🌱 갓생 살기 플래너")
