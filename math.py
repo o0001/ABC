@@ -92,7 +92,7 @@ def safe_image_to_base64(image_file):
         return None
     return base64.b64encode(image_file.read()).decode("utf-8")
 
-# ---------- LaTeX 심볼 도우미 ----------
+# ---------- LaTeX 심볼 도우미 (Raw String r"" 적용) ----------
 def latex_symbol_buttons(target_key="note_text"):
     cols = st.columns(5)
     symbols = [
@@ -127,7 +127,6 @@ class NotesAndToolsPage(PageBase):
     def run(self):
         st.header(f"{self.icon} {self.title}")
         
-        # ---- 새 노트 입력 ----
         with st.container(border=True):
             st.subheader("✍️ 새 노트")
             st.caption("버튼을 클릭해 LaTeX 기호를 쉽게 입력하세요")
@@ -155,7 +154,6 @@ $f'(x)=2x$"""
                 st.subheader("👀 실시간 미리보기")
                 preview = st.session_state.get("note_text", "")
                 
-                # 실시간 미리보기 컨테이너 (고정 높이 및 스크롤 부여로 레이아웃 흔들림 방지)
                 preview_container = st.container(height=250, border=True)
                 with preview_container:
                     if preview.strip():
@@ -163,7 +161,6 @@ $f'(x)=2x$"""
                     else:
                         st.info("왼쪽에 입력하면 여기에 표시됩니다.")
 
-            # 이미지 업로더 추가 (누락되었던 img 변수 선언)
             img = st.file_uploader("참고 이미지 첨부", type=["png", "jpg", "jpeg"], key="new_note_img")
             if img:
                 st.image(img, width=200)
