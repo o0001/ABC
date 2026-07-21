@@ -27,7 +27,7 @@ def init_session():
         "ai_prompt": "",
         "system_prompt": "너는 친절하고 유능한 수학 조교야. 답변은 간결하고 명확하게, 수식은 LaTeX로 표시해줘. 예: $E=mc^2$. 사용자가 유튜브 플레이리스트나 채널, 웹사이트 링크를 추가해달라고 요청하면, '인터넷 검색을 못 한다'고 거절하지 말고, 사용자가 제공한 URL과 제목을 바탕으로 즉시 도구(add_wiki_link 등)를 호출하여 앱에 자동으로 추가해줘.",
         "wiki_links": [
-            {"id": str(uuid.uuid4()), "title": "Veritasium Playlists", "url": "https://www.youtube.com/@veritasium/playlists"},
+            {"id": str(uuid.uuid4()), "title": "Veritasium - Math", "url": "http://www.youtube.com/playlist?list=PLkahZjV5wKe-Z1RP3ZiYwe8JSAolmqF9M"},
             {"id": str(uuid.uuid4()), "title": "Veritasium Korea", "url": "https://www.youtube.com/@veritasium_kor"},
             {"id": str(uuid.uuid4()), "title": "대수학", "url": "https://en.wikipedia.org/wiki/Algebra"},
             {"id": str(uuid.uuid4()), "title": "기하학", "url": "https://en.wikipedia.org/wiki/Geometry"},
