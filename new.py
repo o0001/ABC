@@ -27,7 +27,7 @@ def pg1():
     motto = st.text_input("나의 한 줄 좌우명을 적어주세요")
     if st.button("다짐 수정"):
         edm()
-    if session_state.motto_updated:
+    if st.session_state.motto_updated:
         st.success("사로운 좌우명이 등록되었습니다!")
         st.session_state.motto_updated = False
     st.markdown("---")
