@@ -31,8 +31,46 @@ def init_session():
             {"id": str(uuid.uuid4()), "title": "미적분학", "url": "https://en.wikipedia.org/wiki/Calculus"},
             {"id": str(uuid.uuid4()), "title": "선형대수학", "url": "https://en.wikipedia.org/wiki/Linear_algebra"},
             {"id": str(uuid.uuid4()), "title": "확률론", "url": "https://en.wikipedia.org/wiki/Probability_theory"},
-        ],
-        "basic_tags": ["대수학", "기하학", "미적분학", "선형대수학", "확률", "정수론", "위상수학", "조합론", "수리해석"]
+            {"id": str(uuid.uuid4()), "title": "정수론", "url": "https://en.wikipedia.org/wiki/Number_theory"},
+            {"id": str(uuid.uuid4()), "title": "군론", "url": "https://en.wikipedia.org/wiki/Group_theory"},
+            {"id": str(uuid.uuid4()), "title": "환론", "url": "https://en.wikipedia.org/wiki/Ring_theory"},
+            {"id": str(uuid.uuid4()), "title": "체론", "url": "https://en.wikipedia.org/wiki/Field_(mathematics)"},
+            {"id": str(uuid.uuid4()), "title": "위상수학", "url": "https://en.wikipedia.org/wiki/Topology"},
+            {"id": str(uuid.uuid4()), "title": "미분기하학", "url": "https://en.wikipedia.org/wiki/Differential_geometry"},
+            {"id": str(uuid.uuid4()), "title": "대수기하학", "url": "https://en.wikipedia.org/wiki/Algebraic_geometry"},
+            {"id": str(uuid.uuid4()), "title": "조합론", "url": "https://en.wikipedia.org/wiki/Combinatorics"},
+            {"id": str(uuid.uuid4()), "title": "그래프 이론", "url": "https://en.wikipedia.org/wiki/Graph_theory"},
+            {"id": str(uuid.uuid4()), "title": "게임 이론", "url": "https://en.wikipedia.org/wiki/Game_theory"},
+            {"id": str(uuid.uuid4()), "title": "수리논리학", "url": "https://en.wikipedia.org/wiki/Mathematical_logic"},
+            {"id": str(uuid.uuid4()), "title": "집합론", "url": "https://en.wikipedia.org/wiki/Set_theory"},
+            {"id": str(uuid.uuid4()), "title": "범주론", "url": "https://en.wikipedia.org/wiki/Category_theory"},
+            {"id": str(uuid.uuid4()), "title": "복소해석학", "url": "https://en.wikipedia.org/wiki/Complex_analysis"},
+            {"id": str(uuid.uuid4()), "title": "실해석학", "url": "https://en.wikipedia.org/wiki/Real_analysis"},
+            {"id": str(uuid.uuid4()), "title": "함수해석학", "url": "https://en.wikipedia.org/wiki/Functional_analysis"},
+            {"id": str(uuid.uuid4()), "title": "편미분방정식", "url": "https://en.wikipedia.org/wiki/Partial_differential_equation"},
+            {"id": str(uuid.uuid4()), "title": "상미분방정식", "url": "https://en.wikipedia.org/wiki/Ordinary_differential_equation"},
+            {"id": str(uuid.uuid4()), "title": "푸리에 변환", "url": "https://en.wikipedia.org/wiki/Fourier_transform"},
+            {"id": str(uuid.uuid4()), "title": "라플라스 변환", "url": "https://en.wikipedia.org/wiki/Laplace_transform"},
+            {"id": str(uuid.uuid4()), "title": "수치해석", "url": "https://en.wikipedia.org/wiki/Numerical_analysis"},
+            {"id": str(uuid.uuid4()), "title": "최적화", "url": "https://en.wikipedia.org/wiki/Mathematical_optimization"},
+            {"id": str(uuid.uuid4()), "title": "선형계획법", "url": "https://en.wikipedia.org/wiki/Linear_programming"},
+            {"id": str(uuid.uuid4()), "title": "통계학", "url": "https://en.wikipedia.org/wiki/Statistics"},
+            {"id": str(uuid.uuid4()), "title": "베이지안 통계", "url": "https://en.wikipedia.org/wiki/Bayesian_statistics"},
+            {"id": str(uuid.uuid4()), "title": "머신러닝 수학", "url": "https://en.wikipedia.org/wiki/Mathematics_of_machine_learning"},
+            {"id": str(uuid.uuid4()), "title": "카오스 이론", "url": "https://en.wikipedia.org/wiki/Chaos_theory"},
+            {"id": str(uuid.uuid4()), "title": "프랙탈", "url": "https://en.wikipedia.org/wiki/Fractal"},
+            {"id": str(uuid.uuid4()), "title": "황금비", "url": "https://en.wikipedia.org/wiki/Golden_ratio"},
+            {"id": str(uuid.uuid4()), "title": "수학적 귀납법", "url": "https://en.wikipedia.org/wiki/Mathematical_induction"},
+            {"id": str(uuid.uuid4()), "title": "소수", "url": "https://en.wikipedia.org/wiki/Prime_number"},
+            {"id": str(uuid.uuid4()), "title": "리만 가설", "url": "https://en.wikipedia.org/wiki/Riemann_hypothesis"},
+        ]
+        "basic_tags": [
+    "대수학", "기하학", "미적분학", "선형대수학",
+    "확률", "정수론", "위상수학", "조합론",
+    "수리해석", "군론", "해석학", "미분방정식",
+    "통계학", "최적화", "수치해석", "논리학",
+    "그래프이론", "머신러닝수학"
+]
     }
     for k, v in defaults.items():
         if k not in st.session_state:
