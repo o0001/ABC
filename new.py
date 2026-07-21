@@ -17,7 +17,7 @@ def edm():
     m=st.text_input("나의 한 줄 좌우명을 적어주세요")
     if st.button("다짐저장"):
         st.session_state.user_motto = m
-        st.session_state.motoo_update = ture
+        st.session_state.motoo_update = 1
         st.rerun()
 
 def pg1():
