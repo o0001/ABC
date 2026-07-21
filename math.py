@@ -7,7 +7,7 @@ import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
 from abc import ABC, abstractmethod
-import uuid  # 为笔记生成唯一ID
+import uuid
 
 # ---------- 기본 페이지 클래스 ----------
 class PageBase(ABC):
@@ -26,53 +26,52 @@ def init_session():
         "ai_prompt": "",
         "system_prompt": "너는 친절한 수학 조교야. 답변은 간결하고 명확하게, 수식은 LaTeX로 표시해줘. 예: $E=mc^2$",
         "wiki_links": [
-            {"title": "대수학", "url": "https://en.wikipedia.org/wiki/Algebra"},
-            {"title": "기하학", "url": "https://en.wikipedia.org/wiki/Geometry"},
-            {"title": "미적분학", "url": "https://en.wikipedia.org/wiki/Calculus"},
-            {"title": "선형대수학", "url": "https://en.wikipedia.org/wiki/Linear_algebra"},
-            {"title": "확률론", "url": "https://en.wikipedia.org/wiki/Probability_theory"},
+            {"id": str(uuid.uuid4()), "title": "대수학", "url": "https://en.wikipedia.org/wiki/Algebra"},
+            {"id": str(uuid.uuid4()), "title": "기하학", "url": "https://en.wikipedia.org/wiki/Geometry"},
+            {"id": str(uuid.uuid4()), "title": "미적분학", "url": "https://en.wikipedia.org/wiki/Calculus"},
+            {"id": str(uuid.uuid4()), "title": "선형대수학", "url": "https://en.wikipedia.org/wiki/Linear_algebra"},
+            {"id": str(uuid.uuid4()), "title": "확률론", "url": "https://en.wikipedia.org/wiki/Probability_theory"},
         ],
         "basic_tags": ["대수학", "기하학", "미적분학", "선형대수학", "확률", "정수론", "위상수학", "조합론", "수리해석"]
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+    # 노트 입력용 텍스트 상태 (세션에 없으면 생성)
+    if "note_text" not in st.session_state:
+        st.session_state.note_text = ""
 
 def safe_image_to_base64(image_file):
     if image_file is None:
         return None
     return base64.b64encode(image_file.read()).decode("utf-8")
 
-# ---------- LaTeX 심볼 도우미 ----------
-def latex_helper():
-    with st.expander("📐 LaTeX 수식 기호 (클릭하여 추가)", expanded=False):
-        cols = st.columns(4)
-        symbols = [
-            ("분수", r"\frac{a}{b}"),
-            ("제곱근", r"\sqrt{x}"),
-            ("적분", r"\int_{a}^{b}"),
-            ("합", r"\sum_{i=1}^{n}"),
-            ("극한", r"\lim_{x\to\infty}"),
-            ("행렬", r"\begin{pmatrix}a & b\\ c & d\end{pmatrix}"),
-            ("미분", r"\frac{d}{dx}"),
-            ("편미분", r"\partial"),
-            ("무한대", r"\infty"),
-            ("화살표", r"\rightarrow"),
-        ]
-        for i, (name, code) in enumerate(symbols):
-            with cols[i % 4]:
-                if st.button(name, key=f"latex_{i}", use_container_width=True):
-                    st.session_state.latex_code = st.session_state.get("latex_code", "") + code
-        st.session_state.latex_code = st.text_area(
-            "LaTeX 코드 (여기서 편집 후 미리보기)",
-            value=st.session_state.get("latex_code", ""),
-            height=80,
-            key="latex_editor"
-        )
-        if st.session_state.latex_code:
-            st.latex(st.session_state.latex_code)
-        else:
-            st.info("미리보기")
+# ---------- LaTeX 심볼 도우미 (버튼 클릭 시 텍스트 영역에 추가) ----------
+def latex_symbol_buttons(target_key="note_text"):
+    """버튼을 클릭하면 session_state[target_key]에 해당 LaTeX 코드를 추가한다."""
+    cols = st.columns(5)
+    symbols = [
+        ("분수", r"\frac{a}{b}"),
+        ("제곱근", r"\sqrt{x}"),
+        ("적분", r"\int_{a}^{b}"),
+        ("합", r"\sum_{i=1}^{n}"),
+        ("극한", r"\lim_{x\to\infty}"),
+        ("행렬", r"\begin{pmatrix}a & b\\ c & d\end{pmatrix}"),
+        ("미분", r"\frac{d}{dx}"),
+        ("편미분", r"\partial"),
+        ("무한대", r"\infty"),
+        ("화살표", r"\rightarrow"),
+        ("시그마", r"\sigma"),
+        ("델타", r"\Delta"),
+        ("파이", r"\pi"),
+        ("세타", r"\theta"),
+        ("람다", r"\lambda"),
+        ("오메가", r"\omega"),
+    ]
+    for i, (name, code) in enumerate(symbols):
+        with cols[i % 5]:
+            if st.button(name, key=f"sym_{target_key}_{i}", use_container_width=True):
+                st.session_state[target_key] = st.session_state.get(target_key, "") + code
 
 # ---------- 페이지 1: 노트 + 계산기 + 그래프 ----------
 class NotesAndToolsPage(PageBase):
@@ -81,36 +80,44 @@ class NotesAndToolsPage(PageBase):
     
     def run(self):
         st.header(f"{self.icon} {self.title}")
-        latex_helper()
         
-        # ---- 노트 입력 ----
+        # ---- 새 노트 입력 ----
         with st.container(border=True):
             st.subheader("✍️ 새 노트")
+            st.caption("버튼을 클릭해 LaTeX 기호를 쉽게 입력하세요")
+            latex_symbol_buttons("note_text")   # note_text 상태에 추가
+            
             col1, col2 = st.columns([3, 1])
             with col1:
-                text = st.text_area("내용 (Markdown + LaTeX)", height=120,
-                                    placeholder="예: $E=mc^2$, $\\sum_{k=1}^n k = n(n+1)/2$")
+                # note_text 상태와 바인딩된 text_area
+                st.text_area(
+                    "내용 (Markdown + LaTeX)",
+                    key="note_text",
+                    height=150,
+                    placeholder="예: $E=mc^2$, $\\sum_{k=1}^n k = n(n+1)/2$"
+                )
             with col2:
-                img = st.file_uploader("이미지", type=["png","jpg","jpeg"], label_visibility="collapsed")
+                img = st.file_uploader("이미지", type=["png","jpg","jpeg"], label_visibility="collapsed", key="new_note_img")
                 if img:
                     st.image(img, width=120)
+            
             tags = st.multiselect("기본 태그", st.session_state.basic_tags, default=[], placeholder="선택")
             custom_tags = st.text_input("사용자 태그 (쉼표)", placeholder="공식, 정리")
+            
             if st.button("💾 저장", use_container_width=True):
-                if text.strip() or img or st.session_state.get("latex_code", ""):
+                note_text = st.session_state.get("note_text", "")
+                if note_text.strip() or img:
                     b64 = safe_image_to_base64(img)
                     all_tags = tags + [t.strip() for t in custom_tags.split(",") if t.strip()]
-                    full_text = text
-                    if st.session_state.get("latex_code"):
-                        full_text += f"\n\n$$\n{st.session_state.latex_code}\n$$"
                     st.session_state.notes.append({
-                        "id": str(uuid.uuid4()),  # 고유 ID 부여
-                        "text": full_text,
+                        "id": str(uuid.uuid4()),
+                        "text": note_text,
                         "image": b64,
                         "tags": all_tags,
                         "time": datetime.now().strftime("%Y-%m-%d %H:%M")
                     })
-                    st.session_state.latex_code = ""
+                    # 초기화
+                    st.session_state.note_text = ""
                     st.success("저장 완료")
                     st.rerun()
                 else:
@@ -121,7 +128,6 @@ class NotesAndToolsPage(PageBase):
         if not st.session_state.notes:
             st.info("아직 노트가 없어요")
         else:
-            # 필터 영역
             with st.expander("🔍 필터", expanded=False):
                 filter_tags = st.multiselect("태그로 필터", st.session_state.basic_tags, key="filter_tags")
                 col_date1, col_date2 = st.columns(2)
@@ -130,14 +136,11 @@ class NotesAndToolsPage(PageBase):
                 with col_date2:
                     end_date = st.date_input("종료 날짜", value=None, key="end_date")
             
-            # 필터링된 노트 리스트
             filtered = []
             for note in st.session_state.notes:
-                # 태그 필터 (선택된 태그 중 하나라도 포함되면 표시)
                 if filter_tags:
                     if not any(tag in note["tags"] for tag in filter_tags):
                         continue
-                # 날짜 필터
                 note_date = datetime.strptime(note["time"], "%Y-%m-%d %H:%M").date()
                 if start_date and note_date < start_date:
                     continue
@@ -148,28 +151,39 @@ class NotesAndToolsPage(PageBase):
             if not filtered:
                 st.info("조건에 맞는 노트가 없습니다")
             else:
-                # 노트를 최신순으로 표시
                 for note in reversed(filtered):
                     with st.expander(f"📌 {note['time']}  {', '.join(note['tags'])}"):
-                        # 보기 모드 / 편집 모드 전환
-                        if f"edit_{note['id']}" not in st.session_state:
-                            st.session_state[f"edit_{note['id']}"] = False
+                        # 편집 모드 토글
+                        edit_key = f"edit_{note['id']}"
+                        if edit_key not in st.session_state:
+                            st.session_state[edit_key] = False
                         edit_mode = st.checkbox("편집 모드", key=f"toggle_{note['id']}")
                         
                         if edit_mode:
                             # 편집 UI
-                            new_text = st.text_area("내용", value=note["text"], height=150, key=f"edit_text_{note['id']}")
+                            st.caption("내용 수정 (버튼을 눌러 LaTeX 기호 추가)")
+                            latex_symbol_buttons(f"edit_text_{note['id']}")
+                            new_text = st.text_area(
+                                "내용",
+                                value=note["text"],
+                                key=f"edit_text_{note['id']}",
+                                height=150
+                            )
                             new_img = st.file_uploader("이미지 변경", type=["png","jpg","jpeg"], key=f"edit_img_{note['id']}")
                             if new_img:
                                 st.image(new_img, width=150)
-                            # 태그 편집
                             current_tags = note["tags"]
-                            new_basic = st.multiselect("기본 태그", st.session_state.basic_tags, 
-                                                       default=[t for t in current_tags if t in st.session_state.basic_tags],
-                                                       key=f"edit_basic_{note['id']}")
-                            new_custom = st.text_input("사용자 태그 (쉼표)", 
-                                                       value=", ".join([t for t in current_tags if t not in st.session_state.basic_tags]),
-                                                       key=f"edit_custom_{note['id']}")
+                            new_basic = st.multiselect(
+                                "기본 태그",
+                                st.session_state.basic_tags,
+                                default=[t for t in current_tags if t in st.session_state.basic_tags],
+                                key=f"edit_basic_{note['id']}"
+                            )
+                            new_custom = st.text_input(
+                                "사용자 태그 (쉼표)",
+                                value=", ".join([t for t in current_tags if t not in st.session_state.basic_tags]),
+                                key=f"edit_custom_{note['id']}"
+                            )
                             if st.button("수정 저장", key=f"save_edit_{note['id']}"):
                                 note["text"] = new_text
                                 if new_img:
@@ -182,9 +196,8 @@ class NotesAndToolsPage(PageBase):
                             st.markdown(note["text"])
                             if note.get("image"):
                                 st.image(base64.b64decode(note["image"]), width=250)
-                        # 삭제 버튼
+                        
                         if st.button("🗑 삭제", key=f"del_{note['id']}"):
-                            # ID 기준으로 삭제
                             st.session_state.notes = [n for n in st.session_state.notes if n["id"] != note["id"]]
                             st.rerun()
         
@@ -247,14 +260,14 @@ class WikiPage(PageBase):
         st.header(f"{self.icon} 수학 개념 위키")
         st.caption("개념을 선택하면 AI에게 질문할 수 있어요")
         
-        for i, link in enumerate(st.session_state.wiki_links):
+        for link in st.session_state.wiki_links:
             cols = st.columns([3, 2, 1])
             with cols[0]:
                 st.markdown(f"**{link['title']}**")
             with cols[1]:
                 st.markdown(f"[바로가기]({link['url']})")
             with cols[2]:
-                if st.button("🤖 질문", key=f"wiki_{i}"):
+                if st.button("🤖 질문", key=f"wiki_{link['id']}"):
                     st.session_state.ai_prompt = f"다음 개념을 설명해줘: {link['title']} (참고: {link['url']})"
                     st.toast("AI 대화로 전송됨")
         
@@ -268,7 +281,11 @@ class WikiPage(PageBase):
                 url = st.text_input("URL", placeholder="https://...")
             if st.button("추가", use_container_width=True):
                 if title and url:
-                    st.session_state.wiki_links.append({"title": title, "url": url})
+                    st.session_state.wiki_links.append({
+                        "id": str(uuid.uuid4()),
+                        "title": title,
+                        "url": url
+                    })
                     st.success("추가됨")
                     st.rerun()
                 else:
@@ -285,14 +302,12 @@ class AIChatPage(PageBase):
             st.warning("OpenAI API Key를 사이드바에 입력하세요")
             return
         
-        # 위키에서 넘어온 프롬프트
         prompt = st.session_state.pop("ai_prompt", "")
         if prompt:
             st.info(f"📩 {prompt}")
         
         # 채팅 기록 표시
         for msg in st.session_state.messages:
-            # system 메시지는 표시하지 않음
             if msg["role"] == "system":
                 continue
             with st.chat_message(msg["role"]):
@@ -309,7 +324,7 @@ class AIChatPage(PageBase):
         with st.form("chat_form", clear_on_submit=True):
             col1, col2 = st.columns([5, 1])
             with col1:
-                user_text = st.text_area("질문", value=prompt, height=80, 
+                user_text = st.text_area("질문", value=prompt, height=80,
                                          placeholder="수학 질문을 입력하세요", key="chat_input")
             with col2:
                 uploaded = st.file_uploader("📎", type=["png","jpg","jpeg"], label_visibility="collapsed")
@@ -326,7 +341,6 @@ class AIChatPage(PageBase):
                 else:
                     content = user_text.strip()
                 
-                # 시스템 프롬프트가 아직 메시지 목록에 없으면 맨 앞에 추가
                 sys_prompt = st.session_state.get("system_prompt", "")
                 if sys_prompt and (len(st.session_state.messages) == 0 or st.session_state.messages[0]["role"] != "system"):
                     st.session_state.messages.insert(0, {"role": "system", "content": sys_prompt})
@@ -350,7 +364,6 @@ class AIChatPage(PageBase):
                 st.warning("질문을 입력하세요")
         
         if st.button("🗑 대화 초기화", use_container_width=True):
-            # 시스템 프롬프트는 유지하면서 대화만 삭제할 수도 있지만, 여기서는 전체 초기화
             st.session_state.messages = []
             st.rerun()
 
@@ -378,7 +391,7 @@ def main():
     if api_key:
         openai.api_key = api_key
     
-    # 시스템 프롬프트 편집 (AI 페이지와 공유)
+    # 시스템 프롬프트 편집
     st.sidebar.divider()
     st.sidebar.subheader("🤖 AI 시스템 프롬프트")
     new_prompt = st.sidebar.text_area(
@@ -389,7 +402,6 @@ def main():
     )
     if new_prompt != st.session_state.system_prompt:
         st.session_state.system_prompt = new_prompt
-        # 시스템 프롬프트가 바뀌면 기존 대화에서도 업데이트
         if st.session_state.messages and st.session_state.messages[0]["role"] == "system":
             st.session_state.messages[0]["content"] = new_prompt
     
