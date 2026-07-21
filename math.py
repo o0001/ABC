@@ -37,6 +37,12 @@ def init_session():
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+            
+    # 노트 데이터에 id가 누락된 경우 안전하게 추가
+    for note in st.session_state.notes:
+        if "id" not in note:
+            note["id"] = str(uuid.uuid4())
+            
     # 노트 입력용 텍스트 상태 (세션에 없으면 생성)
     if "note_text" not in st.session_state:
         st.session_state.note_text = ""
