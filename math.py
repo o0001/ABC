@@ -279,7 +279,6 @@ $f'(x)=2x$"""
                         elif calc_type == "미분":
                             res = sp.diff(e, x)
                         elif calc_type == "적분":
-                            # 적분 결과에 적분 상수 C 추가
                             C = sp.Symbol('C')
                             res = sp.integrate(e, x) + C
                         else:
@@ -353,7 +352,56 @@ class WikiPage(PageBase):
                 else:
                     st.warning("모두 입력하세요")
 
-# ---------- 페이지 3: AI 대화 ----------
+# ---------- 페이지 3: 추천 강의 (3B1B & MIT) ----------
+class VideoPage(PageBase):
+    def __init__(self):
+        super().__init__("📺 추천 강의", "📺")
+    
+    def run(self):
+        st.header(f"{self.icon} 추천 수학 강의 영상")
+        st.caption("3Blue1Brown과 MIT OpenCourseWare의 명품 수학 강의를 만나보세요.")
+        
+        tab1, tab2 = st.tabs(["🔵 3Blue1Brown (시각적 직관)", "🏛️ MIT OpenCourseWare (대학 정규 강의)"])
+        
+        with tab1:
+            st.subheader("🎨 3Blue1Brown 핵심 시리즈")
+            b3b1_videos = [
+                {"title": "선형대수의 본질 (Essence of linear algebra)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab", "desc": "벡터, 행렬, 선형 변환의 기하학적 직관을 애니메이션으로 완벽히 이해하는 시리즈"},
+                {"title": "미적분학의 본질 (Essence of calculus)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr", "desc": "도미노처럼 이어지는 미분과 적분의 개념적 본질을 명쾌하게 해설"},
+                {"title": "신경망이란 무엇인가? (Neural Networks)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi", "desc": "딥러닝과 인공신경망의 수학적 원리를 시각적으로 파헤치는 입문 강의"}
+            ]
+            for v in b3b1_videos:
+                with st.container(border=True):
+                    c1, c2 = st.columns([3, 1])
+                    with c1:
+                        st.markdown(f"### {v['title']}")
+                        st.write(v['desc'])
+                    with c2:
+                        st.markdown(f"[🔗 재생목록 보기]({v['url'])")
+                        if st.button("🤖 AI에게 질문", key=f"b3b_{v['title']}"):
+                            st.session_state.ai_prompt = f"3Blue1Brown의 다음 강의 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
+                            st.toast("AI 조교 탭으로 전송되었습니다!")
+
+        with tab2:
+            st.subheader("🎓 MIT OpenCourseWare 수학 명강의")
+            mit_videos = [
+                {"title": "MIT 18.01 싱글 변수 미적분학 (Single Variable Calculus)", "url": "https://www.youtube.com/playlist?list=PLDespKuFfdEFt7xwMPgljQxX3gXy0p4oB", "desc": "미국 MIT의 정통 미적분학 강의로 극한, 도미노 미분법, 적분 응용을 깊이 있게 다룸"},
+                {"title": "MIT 18.06 선형대수학 (Linear Algebra)", "url": "https://www.youtube.com/playlist?list=PLE7DDD91010BC51F8", "desc": "전설적인 교수 Gilbert Strang의 강의로 행렬 연산과 벡터 공간의 바이블"},
+                {"title": "MIT 6.1200J 컴퓨터 과학을 위한 수학 (Mathematics for Computer Science)", "url": "https://www.youtube.com/playlist?list=PLUl4u3cNGP61VNvICqk2HXJTonnKgAc9d", "desc": "논리, 증명, 집합론, 그래프 이론 등 컴퓨터 과학의 뼈대가 되는 수학 강의"}
+            ]
+            for v in mit_videos:
+                with st.container(border=True):
+                    c1, c2 = st.columns([3, 1])
+                    with c1:
+                        st.markdown(f"### {v['title']}")
+                        st.write(v['desc'])
+                    with c2:
+                        st.markdown(f"[🔗 강의 시청하기]({v['url']})")
+                        if st.button("🤖 AI에게 질문", key=f"mit_{v['title']}"):
+                            st.session_state.ai_prompt = f"MIT 수학 강의 내용에 대해 설명해줘: {v['title']} ({v['desc']})"
+                            st.toast("AI 조교 탭으로 전송되었습니다!")
+
+# ---------- 페이지 4: AI 대화 ----------
 class AIChatPage(PageBase):
     def __init__(self):
         super().__init__("🤖 AI 조교", "🤖")
@@ -468,6 +516,7 @@ def main():
     pages = {
         "📝 노트 & 도구": NotesAndToolsPage(),
         "🔗 위키백과": WikiPage(),
+        "📺 추천 강의": VideoPage(),
         "🤖 AI 조교": AIChatPage()
     }
     choice = st.sidebar.radio("메뉴", list(pages.keys()))
