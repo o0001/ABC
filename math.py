@@ -1,429 +1,118 @@
 import streamlit as st
-import openai
-import base64
-import os
-from datetime import datetime
-import sympy as sp
-import matplotlib.pyplot as plt
-import numpy as np
-from abc import ABC, abstractmethod
-import uuid
+from openai import OpenAI
 
-# ---------- 기본 페이지 클래스 ----------
-class PageBase(ABC):
-    def __init__(self, title, icon):
-        self.title = title
-        self.icon = icon
-    @abstractmethod
-    def run(self):
-        pass
+# OpenAI 클라이언트 초기화
+ai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ---------- 세션 초기화 ----------
-def init_session():
-    defaults = {
-        "notes": [],
-        "messages": [],
-        "ai_prompt": "",
-        "system_prompt": "너는 친절한 수학 조교야. 답변은 간결하고 명확하게, 수식은 LaTeX로 표시해줘. 예: $E=mc^2$",
-        "wiki_links": [
-            {"id": str(uuid.uuid4()), "title": "대수학", "url": "https://en.wikipedia.org/wiki/Algebra"},
-            {"id": str(uuid.uuid4()), "title": "기하학", "url": "https://en.wikipedia.org/wiki/Geometry"},
-            {"id": str(uuid.uuid4()), "title": "미적분학", "url": "https://en.wikipedia.org/wiki/Calculus"},
-            {"id": str(uuid.uuid4()), "title": "선형대수학", "url": "https://en.wikipedia.org/wiki/Linear_algebra"},
-            {"id": str(uuid.uuid4()), "title": "확률론", "url": "https://en.wikipedia.org/wiki/Probability_theory"},
-        ],
-        "basic_tags": ["대수학", "기하학", "미적분학", "선형대수학", "확률", "정수론", "위상수학", "조합론", "수리해석"]
-    }
-    for k, v in defaults.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
-            
-    # 노트 데이터에 id가 누락된 경우 안전하게 추가
-    for note in st.session_state.notes:
-        if "id" not in note:
-            note["id"] = str(uuid.uuid4())
-            
-    # 위키 링크 데이터에 id가 누락된 경우 안전하게 추가
-    for link in st.session_state.wiki_links:
-        if "id" not in link:
-            link["id"] = str(uuid.uuid4())
-            
-    # 노트 입력용 텍스트 상태 (세션에 없으면 생성)
-    if "note_text" not in st.session_state:
-        st.session_state.note_text = ""
+# Session State 초기화
+if 'todo_list' not in st.session_state:
+    st.session_state.todo_list = []
+if 'user_motto' not in st.session_state:
+    st.session_state.user_motto = "오늘도 화이팅!"
+if 'motto_updated' not in st.session_state:
+    st.session_state.motto_updated = False
 
-def safe_image_to_base64(image_file):
-    if image_file is None:
-        return None
-    return base64.b64encode(image_file.read()).decode("utf-8")
+def add_todo():
+    task = st.session_state.todo_input
+    if task:
+        st.session_state.todo_list.append([task, False])
+        st.toast("할 일이 추가되었습니다!")
+        st.session_state.todo_input = ""
+    else:
+        st.toast("할 일을 입력하고 버튼을 눌러주세요!")
 
-# ---------- LaTeX 심볼 도우미 (버튼 클릭 시 텍스트 영역에 추가) ----------
-def latex_symbol_buttons(target_key="note_text"):
-    """버튼을 클릭하면 session_state[target_key]에 해당 LaTeX 코드를 추가한다."""
-    cols = st.columns(5)
-    symbols = [
-        ("분수", r"\frac{a}{b}"),
-        ("제곱근", r"\sqrt{x}"),
-        ("적분", r"\int_{a}^{b}"),
-        ("합", r"\sum_{i=1}^{n}"),
-        ("극한", r"\lim_{x\to\infty}"),
-        ("행렬", r"\begin{pmatrix}a & b\\ c & d\end{pmatrix}"),
-        ("미분", r"\frac{d}{dx}"),
-        ("편미분", r"\partial"),
-        ("무한대", r"\infty"),
-        ("화살표", r"\rightarrow"),
-        ("시그마", r"\sigma"),
-        ("델타", r"\Delta"),
-        ("파이", r"\pi"),
-        ("세타", r"\theta"),
-        ("람다", r"\lambda"),
-        ("오메가", r"\omega"),
-    ]
-    for i, (name, code) in enumerate(symbols):
-        with cols[i % 5]:
-            if st.button(name, key=f"sym_{target_key}_{i}", use_container_width=True):
-                st.session_state[target_key] = st.session_state.get(target_key, "") + code
+@st.dialog("오늘의 다짐 수정")
+def edit_motto():
+    motto = st.text_input("나의 한 줄 좌우명을 적어주세요.")
+    if st.button("다짐 저장"):
+        st.session_state.user_motto = motto
+        st.session_state.motto_updated = True
+        st.rerun()
 
-# ---------- 페이지 1: 노트 + 계산기 + 그래프 ----------
-class NotesAndToolsPage(PageBase):
-    def __init__(self):
-        super().__init__("📝 노트 & 도구", "📝")
+def page_motto():
+    st.header("📣 1. 오늘의 다짐")
+    st.info(f"현재 다짐: {st.session_state.user_motto}")
+    if st.button("다짐 수정하기"):
+        edit_motto()
+    if st.session_state.motto_updated:
+        st.success("새로운 좌우명이 등록되었습니다!")
+        st.session_state.motto_updated = False
+    st.markdown("---")
+
+def page_todo():
+    st.header("✅ 2. 오늘의 할 일")
+    st.write(f"현재 다짐: **{st.session_state.user_motto}**")
+    st.text_input("추가할 할 일을 입력하세요", key="todo_input")
+    st.button("추가하기", on_click=add_todo)
     
-    def run(self):
-        st.header(f"{self.icon} {self.title}")
-        
-        # ---- 새 노트 입력 ----
-        with st.container(border=True):
-            st.subheader("✍️ 새 노트")
-            st.caption("버튼을 클릭해 LaTeX 기호를 쉽게 입력하세요")
-            latex_symbol_buttons("note_text")   # note_text 상태에 추가
-            
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                # note_text 상태와 바인딩된 text_area
-                st.text_area(
-                    "내용 (Markdown + LaTeX)",
-                    key="note_text",
-                    height=150,
-                    placeholder="예: $E=mc^2$, $\\sum_{k=1}^n k = n(n+1)/2$"
-                )
-            with col2:
-                img = st.file_uploader("이미지", type=["png","jpg","jpeg"], label_visibility="collapsed", key="new_note_img")
-                if img:
-                    st.image(img, width=120)
-            
-            tags = st.multiselect("기본 태그", st.session_state.basic_tags, default=[], placeholder="선택")
-            custom_tags = st.text_input("사용자 태그 (쉼표)", placeholder="공식, 정리")
-            
-            if st.button("💾 저장", use_container_width=True):
-                note_text = st.session_state.get("note_text", "")
-                if note_text.strip() or img:
-                    b64 = safe_image_to_base64(img)
-                    all_tags = tags + [t.strip() for t in custom_tags.split(",") if t.strip()]
-                    st.session_state.notes.append({
-                        "id": str(uuid.uuid4()),
-                        "text": note_text,
-                        "image": b64,
-                        "tags": all_tags,
-                        "time": datetime.now().strftime("%Y-%m-%d %H:%M")
-                    })
-                    # 초기화
-                    st.session_state.note_text = ""
-                    st.success("저장 완료")
-                    st.rerun()
-                else:
-                    st.warning("내용이나 이미지를 입력하세요")
-        
-        # ---- 노트 필터링 & 목록 ----
-        st.subheader("📚 기록")
-        if not st.session_state.notes:
-            st.info("아직 노트가 없어요")
-        else:
-            with st.expander("🔍 필터", expanded=False):
-                filter_tags = st.multiselect("태그로 필터", st.session_state.basic_tags, key="filter_tags")
-                col_date1, col_date2 = st.columns(2)
-                with col_date1:
-                    start_date = st.date_input("시작 날짜", value=None, key="start_date")
-                with col_date2:
-                    end_date = st.date_input("종료 날짜", value=None, key="end_date")
-            
-            filtered = []
-            for note in st.session_state.notes:
-                if filter_tags:
-                    if not any(tag in note["tags"] for tag in filter_tags):
-                        continue
-                note_date = datetime.strptime(note["time"], "%Y-%m-%d %H:%M").date()
-                if start_date and note_date < start_date:
-                    continue
-                if end_date and note_date > end_date:
-                    continue
-                filtered.append(note)
-            
-            if not filtered:
-                st.info("조건에 맞는 노트가 없습니다")
-            else:
-                for note in reversed(filtered):
-                    with st.expander(f"📌 {note['time']}  {', '.join(note['tags'])}"):
-                        # 편집 모드 토글
-                        edit_key = f"edit_{note['id']}"
-                        if edit_key not in st.session_state:
-                            st.session_state[edit_key] = False
-                        edit_mode = st.checkbox("편집 모드", key=f"toggle_{note['id']}")
-                        
-                        if edit_mode:
-                            # 편집 UI
-                            st.caption("내용 수정 (버튼을 눌러 LaTeX 기호 추가)")
-                            latex_symbol_buttons(f"edit_text_{note['id']}")
-                            new_text = st.text_area(
-                                "내용",
-                                value=note["text"],
-                                key=f"edit_text_{note['id']}",
-                                height=150
-                            )
-                            new_img = st.file_uploader("이미지 변경", type=["png","jpg","jpeg"], key=f"edit_img_{note['id']}")
-                            if new_img:
-                                st.image(new_img, width=150)
-                            current_tags = note["tags"]
-                            new_basic = st.multiselect(
-                                "기본 태그",
-                                st.session_state.basic_tags,
-                                default=[t for t in current_tags if t in st.session_state.basic_tags],
-                                key=f"edit_basic_{note['id']}"
-                            )
-                            new_custom = st.text_input(
-                                "사용자 태그 (쉼표)",
-                                value=", ".join([t for t in current_tags if t not in st.session_state.basic_tags]),
-                                key=f"edit_custom_{note['id']}"
-                            )
-                            if st.button("수정 저장", key=f"save_edit_{note['id']}"):
-                                note["text"] = new_text
-                                if new_img:
-                                    note["image"] = safe_image_to_base64(new_img)
-                                note["tags"] = new_basic + [t.strip() for t in new_custom.split(",") if t.strip()]
-                                st.success("수정 완료")
-                                st.rerun()
-                        else:
-                            # 보기 모드
-                            st.markdown(note["text"])
-                            if note.get("image"):
-                                st.image(base64.b64decode(note["image"]), width=250)
-                        
-                        if st.button("🗑 삭제", key=f"del_{note['id']}"):
-                            st.session_state.notes = [n for n in st.session_state.notes if n["id"] != note["id"]]
-                            st.rerun()
-        
-        st.divider()
-        
-        # ---- 계산기 & 그래프 ----
-        col_calc, col_plot = st.columns(2)
-        with col_calc:
-            st.subheader("🧮 계산기")
-            with st.container(border=True):
-                calc_type = st.selectbox("유형", ["간소화", "미분", "적분", "방정식"], key="calc_type")
-                expr = st.text_input("f(x) =", value="x**2 + 2*x + 1", key="expr")
-                if st.button("계산", use_container_width=True):
-                    try:
-                        x = sp.symbols('x')
-                        e = sp.sympify(expr)
-                        if calc_type == "간소화":
-                            res = sp.simplify(e)
-                        elif calc_type == "미분":
-                            res = sp.diff(e, x)
-                        elif calc_type == "적분":
-                            res = sp.integrate(e, x)
-                        else:
-                            if "=" in expr:
-                                l, r = expr.split("=")
-                                eq = sp.Eq(sp.sympify(l.strip()), sp.sympify(r.strip()))
-                            else:
-                                eq = sp.Eq(e, 0)
-                            res = sp.solve(eq, x)
-                        st.latex(sp.latex(res))
-                    except Exception as e:
-                        st.error(f"오류: {e}")
-        
-        with col_plot:
-            st.subheader("📈 그래프")
-            with st.container(border=True):
-                func = st.text_input("f(x) =", value="sin(x)", key="plot_func")
-                xmin = st.number_input("x 최소", value=-5.0, key="xmin")
-                xmax = st.number_input("x 최대", value=5.0, key="xmax")
-                if st.button("그리기", use_container_width=True):
-                    try:
-                        x_sym = sp.symbols('x')
-                        f = sp.lambdify(x_sym, sp.sympify(func), "numpy")
-                        xs = np.linspace(xmin, xmax, 500)
-                        ys = f(xs)
-                        fig, ax = plt.subplots(figsize=(5,3))
-                        ax.plot(xs, ys, color="#2b8cbe")
-                        ax.grid(True, linestyle="--", alpha=0.5)
-                        ax.set_xlabel("x"); ax.set_ylabel("f(x)")
-                        st.pyplot(fig)
-                    except Exception as e:
-                        st.error(f"오류: {e}")
+    st.markdown("---")
+    for i in range(len(st.session_state.todo_list)):
+        col_task, col_btn, col_status = st.columns([4, 1, 1])
+        with col_task:
+            st.write(f"{i+1}. {st.session_state.todo_list[i][0]}")
+        with col_btn:
+            if st.button("완료", key=f"btn_{i}"):
+                st.session_state.todo_list[i][1] = True
+                st.rerun()
+        with col_status:
+            if st.session_state.todo_list[i][1]:
+                st.write("✅ **달성!**")
+    st.markdown("---")
 
-# ---------- 페이지 2: 위키 링크 ----------
-class WikiPage(PageBase):
-    def __init__(self):
-        super().__init__("🔗 위키백과", "🔗")
-    
-    def run(self):
-        st.header(f"{self.icon} 수학 개념 위키")
-        st.caption("개념을 선택하면 AI에게 질문할 수 있어요")
-        
-        for link in st.session_state.wiki_links:
-            cols = st.columns([3, 2, 1])
-            with cols[0]:
-                st.markdown(f"**{link['title']}**")
-            with cols[1]:
-                st.markdown(f"[바로가기]({link['url']})")
-            with cols[2]:
-                if st.button("🤖 질문", key=f"wiki_{link['id']}"):
-                    st.session_state.ai_prompt = f"다음 개념을 설명해줘: {link['title']} (참고: {link['url']})"
-                    st.toast("AI 대화로 전송됨")
-        
-        st.divider()
-        st.subheader("➕ 링크 추가")
-        with st.container(border=True):
-            c1, c2 = st.columns(2)
-            with c1:
-                title = st.text_input("이름", placeholder="푸리에 변환")
-            with c2:
-                url = st.text_input("URL", placeholder="https://...")
-            if st.button("추가", use_container_width=True):
-                if title and url:
-                    st.session_state.wiki_links.append({
-                        "id": str(uuid.uuid4()),
-                        "title": title,
-                        "url": url
-                    })
-                    st.success("추가됨")
-                    st.rerun()
-                else:
-                    st.warning("모두 입력하세요")
-
-# ---------- 페이지 3: AI 대화 ----------
-class AIChatPage(PageBase):
-    def __init__(self):
-        super().__init__("🤖 AI 조교", "🤖")
-    
-    def run(self):
-        st.header(f"{self.icon} AI 수학 조교")
-        if not openai.api_key:
-            st.warning("OpenAI API Key를 사이드바에 입력하세요")
-            return
-        
-        prompt = st.session_state.pop("ai_prompt", "")
-        if prompt:
-            st.info(f"📩 {prompt}")
-        
-        # 채팅 기록 표시
-        for msg in st.session_state.messages:
-            if msg["role"] == "system":
-                continue
-            with st.chat_message(msg["role"]):
-                if isinstance(msg["content"], list):
-                    for part in msg["content"]:
-                        if part["type"] == "text":
-                            st.markdown(part["text"])
-                        elif part["type"] == "image_url":
-                            st.image(part["image_url"]["url"], width=200)
-                else:
-                    st.markdown(msg["content"])
-        
-        # 입력 폼
-        with st.form("chat_form", clear_on_submit=True):
-            col1, col2 = st.columns([5, 1])
-            with col1:
-                user_text = st.text_area("질문", value=prompt, height=80,
-                                         placeholder="수학 질문을 입력하세요", key="chat_input")
-            with col2:
-                uploaded = st.file_uploader("📎", type=["png","jpg","jpeg"], label_visibility="collapsed")
-            submitted = st.form_submit_button("전송")
-        
-        if submitted:
-            if user_text.strip() or uploaded:
-                if uploaded:
-                    b64 = safe_image_to_base64(uploaded)
-                    content = [
-                        {"type": "text", "text": user_text if user_text.strip() else "이미지 분석해줘"},
-                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
-                    ]
-                else:
-                    content = user_text.strip()
-                
-                sys_prompt = st.session_state.get("system_prompt", "")
-                if sys_prompt and (len(st.session_state.messages) == 0 or st.session_state.messages[0]["role"] != "system"):
-                    st.session_state.messages.insert(0, {"role": "system", "content": sys_prompt})
-                
-                st.session_state.messages.append({"role": "user", "content": content})
-                
-                with st.spinner("생각 중..."):
-                    try:
-                        resp = openai.ChatCompletion.create(
-                            model="gpt-4o",
-                            messages=st.session_state.messages,
-                            max_tokens=1024,
-                            temperature=0.7
-                        )
-                        reply = resp.choices[0].message.content
-                        st.session_state.messages.append({"role": "assistant", "content": reply})
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"OpenAI 오류: {e}")
-            else:
-                st.warning("질문을 입력하세요")
-        
-        if st.button("🗑 대화 초기화", use_container_width=True):
-            st.session_state.messages = []
+def page_report():
+    st.header("📈 3. 나의 갓생 지수")
+    if not st.session_state.todo_list:
+        st.write("아직 등록된 할 일이 없습니다.")
+    else:
+        total = len(st.session_state.todo_list)
+        count = 0
+        for item in st.session_state.todo_list:
+            if item[1] == True:
+                count += 1
+        progress = (count / total) * 100
+        st.metric("오늘의 달성률", f"{progress:.1f}%")
+        st.progress(progress / 100)
+        if progress == 100:
+            st.balloons()
+            st.success("모든 목표를 달성하셨습니다! 🏆")
+        if st.button("기록 전체 초기화"):
+            st.session_state.todo_list = []
             st.rerun()
 
-# ---------- 메인 ----------
-def main():
-    st.set_page_config(page_title="수학 도우미", page_icon="📐", layout="wide")
-    st.markdown("""
-    <style>
-        .stApp { background: #fafafa; }
-        .stButton>button { border-radius: 8px; font-weight: 500; transition: 0.2s; }
-        .stButton>button:hover { background-color: #eef6ff; border-color: #90caf9; }
-        .stTextArea textarea { border-radius: 8px; }
-        .stExpander { border: 1px solid #e0e0e0; border-radius: 10px; }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    init_session()
-    
-    st.sidebar.title("📐 수학 도우미")
-    api_key = st.sidebar.text_input(
-        "OpenAI API Key",
-        value=os.environ.get("OPENAI_API_KEY", ""),
-        type="password"
-    )
-    if api_key:
-        openai.api_key = api_key
-    
-    # 시스템 프롬프트 편집
-    st.sidebar.divider()
-    st.sidebar.subheader("🤖 AI 시스템 프롬프트")
-    new_prompt = st.sidebar.text_area(
-        "AI 역할 지정",
-        value=st.session_state.system_prompt,
-        height=100,
-        help="AI에게 원하는 역할과 답변 방식을 알려주세요."
-    )
-    if new_prompt != st.session_state.system_prompt:
-        st.session_state.system_prompt = new_prompt
-        if st.session_state.messages and st.session_state.messages[0]["role"] == "system":
-            st.session_state.messages[0]["content"] = new_prompt
-    
-    pages = {
-        "📝 노트 & 도구": NotesAndToolsPage(),
-        "🔗 위키백과": WikiPage(),
-        "🤖 AI 조교": AIChatPage()
-    }
-    choice = st.sidebar.radio("메뉴", list(pages.keys()))
-    st.sidebar.caption("✨ AI와 함께 수학을")
-    pages[choice].run()
+def page_ai_coach():
+    st.header("🧐 AI 코치와 대화하기")
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {"role": "system", "content": "너는 사용자의 할 일 목록과 달성 정도를 분석하여 조언하는 열정적인 코치야. 사용자가 더 멋진 삶을 살 수 있도록 명확한 조언과 응원해줘."}
+        ]
+        
+    for message in st.session_state.messages:
+        if message["role"] != "system":
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+                
+    question = st.chat_input("질문을 입력하세요")
+    if question:
+        st.session_state.messages.append({"role": "user", "content": question})
+        with st.chat_message("user"):
+            st.markdown(question)
+        with st.chat_message("assistant"):
+            status_context = f"현재 나의 할 일과 달성 여부: {st.session_state.todo_list}"
+            prompt = st.session_state.messages + [{"role": "system", "content": status_context}]
+            with st.spinner("AI 코치가 생각 중...🤔"):
+                response = ai_client.chat.completions.create(
+                    model="gpt-5.4-mini",
+                    messages=prompt)
+                ai_response = response.choices[0].message.content
+                st.markdown(ai_response)
+        st.session_state.messages.append({"role": "assistant", "content": ai_response})
 
-if __name__ == "__main__":
-    main()
+# 페이지 내비게이션 설정
+pg = st.navigation([
+    st.Page(page_motto, title="오늘의 다짐", icon="📣"),
+    st.Page(page_todo, title="오늘의 할 일", icon="✅"),
+    st.Page(page_report, title="나의 갓생 지수", icon="📈"),
+    st.Page(page_ai_coach, title="AI 코칭", icon="🧐")], position="top")
+
+st.title("🌱 갓생 살기 플래너")
+pg.run()
