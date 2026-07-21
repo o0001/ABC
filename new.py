@@ -1,4 +1,15 @@
 import streamlit as st
+from openai import OpenAI
+ai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+def page_ai_coach():
+    st.header("AI코치와 대화하기")
+    prompt = st.text_input("질문을 입력하세요")
+    if st.button("보내기"):
+        reseponse = ai_client.reseponses.create(
+            model="gpt-5.4-mini"
+            input=prompt
+        )
 if 'motto_updated' not in st.session_state:
     st.session_state.motto_updated = False
 if 'todo_list' not in st.session_state:
