@@ -20,7 +20,7 @@ def edm():
         st.session_state.motto_updated = True
         st.rerun()
 
-def pg1():
+def page_motto():
     st.title("🌱 갓생 살기 플래너")
     st.header("📣 1. 오늘의 다짐")
     st.info(f"현제다짐:{st.session_state.user_motto}")
@@ -69,7 +69,7 @@ def pg3():
             st.session_state.todo_list = []
             st.rerun()
 pg = st.navigation([
-    st.Page(pg1, title="오늘의 다짐"), 
+    st.Page(page_motto, title="오늘의 다짐"), 
     st.Page(pg2, title="오늘의 할 일"),
     st.Page(pg3, title="나의 갓생 지수")
 ],position="top")
