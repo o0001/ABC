@@ -377,7 +377,7 @@ class VideoPage(PageBase):
                         st.markdown(f"### {v['title']}")
                         st.write(v['desc'])
                     with c2:
-                        st.markdown(f"[🔗 재생목록 보기]({v['url'])")
+                        st.markdown(f"[🔗 재생목록 보기]({v['url']})")
                         if st.button("🤖 AI에게 질문", key=f"b3b_{v['title']}"):
                             st.session_state.ai_prompt = f"3Blue1Brown의 다음 강의 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
                             st.toast("AI 조교 탭으로 전송되었습니다!")
