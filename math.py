@@ -352,16 +352,21 @@ class WikiPage(PageBase):
                 else:
                     st.warning("모두 입력하세요")
 
-# ---------- 페이지 3: 추천 강의 (3B1B & MIT) ----------
+# ---------- 페이지 3: 추천 강의 (3B1B, MIT, 만사침사록, Mathemaniac) ----------
 class VideoPage(PageBase):
     def __init__(self):
         super().__init__("📺 추천 강의", "📺")
     
     def run(self):
         st.header(f"{self.icon} 추천 수학 강의 영상")
-        st.caption("3Blue1Brown과 MIT OpenCourseWare의 명품 수학 강의를 만나보세요.")
+        st.caption("전 세계 최고 수준의 수학 시각화 및 대학원/교양 채널들을 만나보세요.")
         
-        tab1, tab2 = st.tabs(["🔵 3Blue1Brown (시각적 직관)", "🏛️ MIT OpenCourseWare (대학 정규 강의)"])
+        tab1, tab2, tab3, tab4 = st.tabs([
+            "🔵 3Blue1Brown", 
+            "🏛️ MIT OpenCourseWare", 
+            "🇨🇳 만사침사록 (Meditation Math)", 
+            "📐 Mathemaniac"
+        ])
         
         with tab1:
             st.subheader("🎨 3Blue1Brown 핵심 시리즈")
@@ -396,9 +401,46 @@ class VideoPage(PageBase):
                         st.markdown(f"### {v['title']}")
                         st.write(v['desc'])
                     with c2:
-                        st.markdown(f"[🔗 강의 시청하기]({v['url']})")
+                        st.markdown(f"[🔗 강의 시청하기]({v['url']})", unsafe_allow_html=True)
                         if st.button("🤖 AI에게 질문", key=f"mit_{v['title']}"):
                             st.session_state.ai_prompt = f"MIT 수학 강의 내용에 대해 설명해줘: {v['title']} ({v['desc']})"
+                            st.toast("AI 조교 탭으로 전송되었습니다!")
+
+        with tab3:
+            st.subheader("🇨🇳 만사침사록 (Meditation Math) 플레이리스트")
+            manshi_videos = [
+                {"title": "漫士数学 플레이리스트 (Meditation Math)", "url": "https://www.youtube.com/playlist?list=PLShBlXb7zxehR3ebOvob3_S01lPepc84-", "desc": "인공신경망, 딥러닝, 기하학적 통찰 등 깊이 있는 수학적 개념을 직관적으로 탐구하는 시리즈"}
+            ]
+            for v in manshi_videos:
+                with st.container(border=True):
+                    c1, c2 = st.columns([3, 1])
+                    with c1:
+                        st.markdown(f"### {v['title']}")
+                        st.write(v['desc'])
+                    with c2:
+                        st.markdown(f"[🔗 재생목록 보기]({v['url']})")
+                        if st.button("🤖 AI에게 질문", key=f"manshi_{v['title']}"):
+                            st.session_state.ai_prompt = f"만사침사록의 수학/AI 콘텐츠 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
+                            st.toast("AI 조교 탭으로 전송되었습니다!")
+
+        with tab4:
+            st.subheader("📐 Mathemaniac 플레이리스트")
+            mathemaniac_videos = [
+                {"title": "Essence of complex analysis", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_UDdkQ3KQjX5SRQ2DLLwv0R", "desc": "복소해석학의 핵심 원리를 명쾌하고 아름답게 시각화한 시리즈"},
+                {"title": "Traditional topics, explained in a new way", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_WVum1CMO9hMSIa7TyrGjsK", "desc": "기존의 수학 주제들을 완전히 새로운 시각과 방법으로 풀어낸 플레이리스트"},
+                {"title": "Essence of differential forms", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_XBTtg1vNbsWZbx0WPK09GI", "desc": "미분형식(Differential Forms)의 본질을 직관적으로 이해할 수 있는 고급 수학 시리즈"},
+                {"title": "Essence of Group Theory", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_VuNbn8HiHZKKy59SgnIAeO", "desc": "추상대수학의 기초인 군론(Group Theory)의 개념적 본질을 다루는 시리즈"}
+            ]
+            for v in mathemaniac_videos:
+                with st.container(border=True):
+                    c1, c2 = st.columns([3, 1])
+                    with c1:
+                        st.markdown(f"### {v['title']}")
+                        st.write(v['desc'])
+                    with c2:
+                        st.markdown(f"[🔗 재생목록 보기]({v['url']})")
+                        if st.button("🤖 AI에게 질문", key=f"mathemaniac_{v['title']}"):
+                            st.session_state.ai_prompt = f"Mathemaniac 채널의 다음 강의 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
                             st.toast("AI 조교 탭으로 전송되었습니다!")
 
 # ---------- 페이지 4: AI 대화 ----------
