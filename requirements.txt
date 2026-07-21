@@ -2,3 +2,6 @@ streamlit
 openai
 sympy
 matplotlib
+numpy
+pandas
+plotly
