@@ -1,5 +1,5 @@
 import streamlit as st
-if "motto_updated" not in st.session_state:
+if 'motto_updated' not in st.session_state:
     st.session_state.motto_updated = False
 if 'todo_list' not in st.session_state:
     st.session_state.todo_list = []
