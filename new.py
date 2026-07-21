@@ -22,6 +22,10 @@ def page_motto():
     st.info(f"현재 다짐:{st.session_state.user_motto}")
     if st.button("다짐 수정"):
         edm()
+        if st.button("다짐저장"):
+            st.session_state.user_motto = motto
+            st.session_state.motto_updated = True
+            st.rerun()
     if st.session_state.motto_updated:
         st.success("새로운 좌우명이 등록되었습니다!")
         st.session_state.motto_updated = False
