@@ -62,7 +62,7 @@ def init_session():
             {"id": str(uuid.uuid4()), "title": "황금비", "url": "https://en.wikipedia.org/wiki/Golden_ratio"},
             {"id": str(uuid.uuid4()), "title": "수학적 귀납법", "url": "https://en.wikipedia.org/wiki/Mathematical_induction"},
             {"id": str(uuid.uuid4()), "title": "소수", "url": "https://en.wikipedia.org/wiki/Prime_number"},
-            {"id": str(uuid.uuid4()), "title": "리만 가설", "url": "https://en.wikipedia.org/wiki/Riemann_hypothesis"},
+            {"id": str(uuid.uuid4()), "title": "리만 가설", "url": "https://en.wikipedia.org/wiki/Riemann_hypothesis"}
         ]
         "basic_tags": [
     "대수학", "기하학", "미적분학", "선형대수학",
