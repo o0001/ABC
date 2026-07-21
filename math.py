@@ -3,165 +3,363 @@ import openai
 import base64
 from datetime import datetime
 
-# ---------- 页面配置 ----------
-st.set_page_config(page_title="数学学习助手", layout="wide")
+# ---------- 페이지 설정 ----------
+st.set_page_config(page_title="수학 학습 도우미", layout="wide")
 
-# ---------- 初始化 session_state ----------
+# ---------- session_state 초기화 ----------
 if "notes" not in st.session_state:
-    st.session_state.notes = []  # 每条笔记: {"text":..., "tags":[...], "time":...}
+    st.session_state.notes = []  # 각 노트: {"text":..., "tags":[...], "time":...}
 if "messages" not in st.session_state:
-    st.session_state.messages = []  # 聊天记录
+    st.session_state.messages = []  # 채팅 기록
 if "ai_prompt" not in st.session_state:
-    st.session_state.ai_prompt = ""  # 从 pg2 传来的预设问题
+    st.session_state.ai_prompt = ""  # 위키 페이지에서 전달된 질문
 if "wiki_links" not in st.session_state:
-    # 预留给你的维基百科数学概念链接，你可以自行修改和添加
     st.session_state.wiki_links = [
-        {"title": "代数", "url": "https://en.wikipedia.org/wiki/Algebra"},
-        {"title": "几何", "url": "https://en.wikipedia.org/wiki/Geometry"},
-        {"title": "微积分", "url": "https://en.wikipedia.org/wiki/Calculus"},
-        {"title": "线性代数", "url": "https://en.wikipedia.org/wiki/Linear_algebra"},
-        {"title": "概率论", "url": "https://en.wikipedia.org/wiki/Probability_theory"},
+        {"title": "대수학", "url": "https://en.wikipedia.org/wiki/Algebra"},
+        {"title": "기하학", "url": "https://en.wikipedia.org/wiki/Geometry"},
+        {"title": "미적분학", "url": "https://en.wikipedia.org/wiki/Calculus"},
+        {"title": "선형대수학", "url": "https://en.wikipedia.org/wiki/Linear_algebra"},
+        {"title": "확률론", "url": "https://en.wikipedia.org/wiki/Probability_theory"},
     ]
-if "basic_tags" not in st.session_state:
-    st.session_state.basic_tags = ["代数", "几何", "微积分", "线性代数", "概率", "数论", "拓扑", "组合数学", "数学分析"]
 
-# ---------- 侧边栏：全局设置与导航 ----------
-st.sidebar.title("📐 数学学习助手")
-page = st.sidebar.radio("导航", ["📝 笔记与标签", "🔗 维基百科链接", "🤖 AI 对话"])
+if "basic_tags" not in st.session_state:
+    st.session_state.basic_tags = [
+        "대수학",
+        "기하학",
+        "미적분",
+        "선형대수",
+        "확률",
+        "수론",
+        "위상수학",
+        "조합수학",
+        "수학적 분석"
+    ]
+
+# ---------- 사이드바: 설정 및 메뉴 ----------
+st.sidebar.title("📐 수학 학습 도우미")
+
+page = st.sidebar.radio(
+    "메뉴",
+    ["📝 노트 및 태그", "🔗 위키백과 링크", "🤖 AI 대화"]
+)
 
 # OpenAI API Key
-api_key = st.sidebar.text_input("输入 OpenAI API Key", type="password")
+api_key = st.sidebar.text_input("OpenAI API Key 입력", type="password")
+
 if api_key:
     openai.api_key = api_key
 
-# ---------- 工具函数 ----------
+
+# ---------- 도구 함수 ----------
 def image_to_base64(image_file):
-    """将上传的图片转为 base64 字符串"""
+    """업로드한 이미지를 base64 문자열로 변환"""
     return base64.b64encode(image_file.read()).decode("utf-8")
 
-# ---------- 页面1: 笔记与标签 ----------
-if page == "📝 笔记与标签":
-    st.header("📝 数学笔记")
-    
+
+# ---------- 페이지1: 노트 및 태그 ----------
+if page == "📝 노트 및 태그":
+
+    st.header("📝 수학 노트")
+
     col1, col2 = st.columns([2, 1])
-    
+
     with col1:
-        note_text = st.text_area("写点数学笔记...", height=200)
-        selected_basic_tags = st.multiselect("选择基本标签", st.session_state.basic_tags)
-        custom_tags_input = st.text_input("自定义标签（用逗号分隔）", placeholder="例如: 公式, 定理, 错题")
-        
-        if st.button("保存笔记"):
+
+        note_text = st.text_area(
+            "수학 노트를 작성하세요...",
+            height=200
+        )
+
+        selected_basic_tags = st.multiselect(
+            "기본 태그 선택",
+            st.session_state.basic_tags
+        )
+
+        custom_tags_input = st.text_input(
+            "사용자 정의 태그 (쉼표로 구분)",
+            placeholder="예: 공식, 정리, 오답"
+        )
+
+        if st.button("노트 저장"):
+
             if note_text.strip():
-                # 处理自定义标签
-                custom_tags = [t.strip() for t in custom_tags_input.split(",") if t.strip()]
+
+                custom_tags = [
+                    t.strip()
+                    for t in custom_tags_input.split(",")
+                    if t.strip()
+                ]
+
                 all_tags = selected_basic_tags + custom_tags
-                st.session_state.notes.append({
-                    "text": note_text,
-                    "tags": all_tags,
-                    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                })
-                st.success("笔记已保存！")
+
+                st.session_state.notes.append(
+                    {
+                        "text": note_text,
+                        "tags": all_tags,
+                        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                )
+
+                st.success("노트가 저장되었습니다!")
+
             else:
-                st.warning("笔记内容不能为空")
-    
+                st.warning("노트 내용은 비워둘 수 없습니다.")
+
+
     with col2:
-        st.subheader("所有笔记")
+
+        st.subheader("모든 노트")
+
         if not st.session_state.notes:
-            st.info("还没有笔记，快写一条吧")
+
+            st.info("아직 노트가 없습니다. 첫 번째 노트를 작성해보세요!")
+
         else:
+
             for i, note in enumerate(reversed(st.session_state.notes)):
-                with st.expander(f"笔记 {len(st.session_state.notes)-i} - {note['time']}"):
+
+                with st.expander(
+                    f"노트 {len(st.session_state.notes)-i} - {note['time']}"
+                ):
+
                     st.markdown(note["text"])
+
                     if note["tags"]:
-                        st.caption("标签: " + ", ".join(note["tags"]))
-                    if st.button("删除", key=f"del_{i}"):
-                        del st.session_state.notes[len(st.session_state.notes)-1-i]
+                        st.caption(
+                            "태그: " + ", ".join(note["tags"])
+                        )
+
+                    if st.button("삭제", key=f"del_{i}"):
+
+                        del st.session_state.notes[
+                            len(st.session_state.notes)-1-i
+                        ]
+
                         st.rerun()
 
-# ---------- 页面2: 维基百科链接 ----------
-elif page == "🔗 维基百科链接":
-    st.header("🔗 数学概念 · 维基百科")
-    st.caption("点击按钮可将概念发送到 AI 对话页进行问答")
-    
+
+
+# ---------- 페이지2: 위키백과 링크 ----------
+elif page == "🔗 위키백과 링크":
+
+    st.header("🔗 수학 개념 · 위키백과")
+
+    st.caption(
+        "버튼을 클릭하면 개념을 AI 대화 페이지로 보내 질문할 수 있습니다."
+    )
+
+
     for i, link in enumerate(st.session_state.wiki_links):
+
         col1, col2, col3 = st.columns([3, 2, 1])
+
         with col1:
             st.markdown(f"**{link['title']}**")
-        with col2:
-            st.markdown(f"[{link['url']}]({link['url']})")
-        with col3:
-            if st.button("问 AI", key=f"ask_{i}"):
-                st.session_state.ai_prompt = f"请解释这个数学概念：{link['title']}，参考链接：{link['url']}"
-                st.success("已复制到 AI 对话，切换页面即可查看")
-    
-    st.divider()
-    st.subheader("➕ 添加你自己的维基链接")
-    new_title = st.text_input("概念名称", placeholder="例如：傅里叶变换")
-    new_url = st.text_input("维基百科 URL", placeholder="https://en.wikipedia.org/wiki/...")
-    if st.button("添加链接"):
-        if new_title and new_url:
-            st.session_state.wiki_links.append({"title": new_title, "url": new_url})
-            st.success("链接已添加")
-            st.rerun()
-        else:
-            st.warning("请填写完整信息")
 
-# ---------- 页面3: AI 对话与图片上传 ----------
-elif page == "🤖 AI 对话":
-    st.header("🤖 AI 数学助教")
-    
+        with col2:
+            st.markdown(
+                f"[{link['url']}]({link['url']})"
+            )
+
+        with col3:
+
+            if st.button("AI에게 질문", key=f"ask_{i}"):
+
+                st.session_state.ai_prompt = (
+                    f"이 수학 개념을 설명해주세요: {link['title']}, "
+                    f"참고 링크: {link['url']}"
+                )
+
+                st.success(
+                    "AI 대화 페이지로 전달되었습니다."
+                )
+
+
+    st.divider()
+
+    st.subheader("➕ 나만의 위키 링크 추가")
+
+    new_title = st.text_input(
+        "개념 이름",
+        placeholder="예: 푸리에 변환"
+    )
+
+    new_url = st.text_input(
+        "위키백과 URL",
+        placeholder="https://en.wikipedia.org/wiki/..."
+    )
+
+
+    if st.button("링크 추가"):
+
+        if new_title and new_url:
+
+            st.session_state.wiki_links.append(
+                {
+                    "title": new_title,
+                    "url": new_url
+                }
+            )
+
+            st.success("링크가 추가되었습니다.")
+
+            st.rerun()
+
+        else:
+
+            st.warning(
+                "모든 정보를 입력해주세요."
+            )
+
+
+
+# ---------- 페이지3: AI 대화 및 이미지 업로드 ----------
+elif page == "🤖 AI 대화":
+
+    st.header("🤖 AI 수학 튜터")
+
+
     if not api_key:
-        st.warning("请先在侧边栏输入 OpenAI API Key")
+
+        st.warning(
+            "먼저 사이드바에서 OpenAI API Key를 입력해주세요."
+        )
+
+
     else:
-        # 如果有从 pg2 传来的预设问题，自动填入输入框
+
         prompt_from_pg2 = st.session_state.ai_prompt
+
+
         if prompt_from_pg2:
-            st.info(f"📋 来自维基页面的问题：{prompt_from_pg2}")
-            # 清空传递变量，避免重复显示
+
+            st.info(
+                f"📋 위키 페이지에서 전달된 질문: {prompt_from_pg2}"
+            )
+
             st.session_state.ai_prompt = ""
-        
-        # 聊天历史显示
+
+
         for msg in st.session_state.messages:
+
             with st.chat_message(msg["role"]):
+
                 st.markdown(msg["content"])
-        
-        # 输入区域
-        with st.form(key="chat_form", clear_on_submit=True):
-            user_input = st.text_area("输入你的数学问题", value=prompt_from_pg2, height=100, placeholder="例如：解释一下黎曼猜想...")
-            uploaded_image = st.file_uploader("上传图片（可选，支持数学公式、题目截图）", type=["png", "jpg", "jpeg"])
-            submit_button = st.form_submit_button("发送")
-        
-        if submit_button and (user_input.strip() or uploaded_image):
-            # 准备用户消息
+
+
+
+        with st.form(
+            key="chat_form",
+            clear_on_submit=True
+        ):
+
+            user_input = st.text_area(
+                "수학 질문 입력",
+                value=prompt_from_pg2,
+                height=100,
+                placeholder="예: 리만 가설을 설명해주세요..."
+            )
+
+
+            uploaded_image = st.file_uploader(
+                "이미지 업로드 (선택 사항, 수식/문제 사진 지원)",
+                type=["png", "jpg", "jpeg"]
+            )
+
+
+            submit_button = st.form_submit_button(
+                "전송"
+            )
+
+
+
+        if submit_button and (
+            user_input.strip()
+            or uploaded_image
+        ):
+
             if uploaded_image:
-                base64_image = image_to_base64(uploaded_image)
-                image_url = f"data:image/jpeg;base64,{base64_image}"
-                # 构建用户消息，包含图片和文字
+
+                base64_image = image_to_base64(
+                    uploaded_image
+                )
+
+                image_url = (
+                    f"data:image/jpeg;base64,{base64_image}"
+                )
+
+
                 user_message_content = [
-                    {"type": "text", "text": user_input if user_input.strip() else "请分析这张图片中的数学内容"},
-                    {"type": "image_url", "image_url": {"url": image_url}}
+
+                    {
+                        "type": "text",
+                        "text":
+                        user_input
+                        if user_input.strip()
+                        else "이 이미지 속 수학 내용을 분석해주세요."
+                    },
+
+                    {
+                        "type": "image_url",
+                        "image_url":
+                        {
+                            "url": image_url
+                        }
+                    }
+
                 ]
+
             else:
+
                 user_message_content = user_input.strip()
-            
-            # 添加到历史
-            st.session_state.messages.append({"role": "user", "content": user_message_content})
-            
-            # 调用 OpenAI API
-            with st.spinner("思考中..."):
+
+
+
+            st.session_state.messages.append(
+                {
+                    "role": "user",
+                    "content": user_message_content
+                }
+            )
+
+
+            with st.spinner("생각 중..."):
+
                 try:
+
                     response = openai.ChatCompletion.create(
-                        model="gpt-4o",  # 支持视觉的模型
+                        model="gpt-4o",
                         messages=st.session_state.messages,
                         max_tokens=1000
                     )
-                    assistant_reply = response.choices[0].message.content
-                    st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+
+
+                    assistant_reply = (
+                        response.choices[0]
+                        .message.content
+                    )
+
+
+                    st.session_state.messages.append(
+                        {
+                            "role": "assistant",
+                            "content": assistant_reply
+                        }
+                    )
+
+
                     st.rerun()
+
+
                 except Exception as e:
-                    st.error(f"出错了：{e}")
-        
-        # 清空对话按钮
-        if st.button("清空对话历史"):
+
+                    st.error(
+                        f"오류 발생: {e}"
+                    )
+
+
+        if st.button("대화 기록 삭제"):
+
             st.session_state.messages = []
+
             st.rerun()
