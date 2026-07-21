@@ -27,6 +27,7 @@ def init_session():
         "ai_prompt": "",
         "system_prompt": "너는 친절하고 유능한 수학 조교야. 답변은 간결하고 명확하게, 수식은 LaTeX로 표시해줘. 예: $E=mc^2$. 사용자가 유튜브 플레이리스트나 채널, 웹사이트 링크를 추가해달라고 요청하면, '인터넷 검색을 못 한다'고 거절하지 말고, 사용자가 제공한 URL과 제목을 바탕으로 즉시 도구(add_wiki_link 등)를 호출하여 앱에 자동으로 추가해줘.",
         "wiki_links": [
+            {"id": str(uuid.uuid4()), "title": "Veritasium Playlists", "url": "https://www.youtube.com/@veritasium/playlists"},
             {"id": str(uuid.uuid4()), "title": "Veritasium Korea", "url": "https://www.youtube.com/@veritasium_kor"},
             {"id": str(uuid.uuid4()), "title": "대수학", "url": "https://en.wikipedia.org/wiki/Algebra"},
             {"id": str(uuid.uuid4()), "title": "기하학", "url": "https://en.wikipedia.org/wiki/Geometry"},
@@ -73,7 +74,6 @@ def init_session():
             "통계학", "최적화", "수치해석", "논리학",
             "그래프이론", "머신러닝수학"
         ],
-        # 숙련도 및 진단 평가 데이터 구조 추가
         "skill_metrics": {
             "adaptive_level": 1.0,
             "prerequisite_checkpoints": {"선형대수": "미완료", "편미분": "미완료"},
@@ -515,7 +515,7 @@ class VideoPage(PageBase):
                             st.session_state.ai_prompt = f"Mathemaniac 채널의 다음 강의 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
                             st.toast("AI 조교 탭으로 전송되었습니다!")
 
-# ---------- 페이지 4: 숙련도 진단 (신규 추가) ----------
+# ---------- 페이지 4: 숙련도 진단 ----------
 class SkillAssessmentPage(PageBase):
     def __init__(self):
         super().__init__("📊 숙련도 진단", "📊")
