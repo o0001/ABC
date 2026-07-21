@@ -64,6 +64,26 @@ def init_session():
             {"id": str(uuid.uuid4()), "title": "소수", "url": "https://en.wikipedia.org/wiki/Prime_number"},
             {"id": str(uuid.uuid4()), "title": "리만 가설", "url": "https://en.wikipedia.org/wiki/Riemann_hypothesis"}
         ],
+        "video_playlists": [
+            # 3Blue1Brown
+            {"id": str(uuid.uuid4()), "category": "🔵 3Blue1Brown", "title": "선형대수의 본질 (Essence of linear algebra)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab", "desc": "벡터, 행렬, 선형 변환의 기하학적 직관을 애니메이션으로 완벽히 이해하는 시리즈"},
+            {"id": str(uuid.uuid4()), "category": "🔵 3Blue1Brown", "title": "미적분학의 본질 (Essence of calculus)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr", "desc": "도미노처럼 이어지는 미분과 적분의 개념적 본질을 명쾌하게 해설"},
+            {"id": str(uuid.uuid4()), "category": "🔵 3Blue1Brown", "title": "신경망이란 무엇인가? (Neural Networks)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi", "desc": "딥러닝과 인공신경망의 수학적 원리를 시각적으로 파헤치는 입문 강의"},
+            
+            # MIT OpenCourseWare
+            {"id": str(uuid.uuid4()), "category": "🏛️ MIT OpenCourseWare", "title": "MIT 18.01 싱글 변수 미적분학", "url": "https://www.youtube.com/playlist?list=PLDespKuFfdEFt7xwMPgljQxX3gXy0p4oB", "desc": "미국 MIT의 정통 미적분학 강의로 극한, 도미노 미분법, 적분 응용을 깊이 있게 다룸"},
+            {"id": str(uuid.uuid4()), "category": "🏛️ MIT OpenCourseWare", "title": "MIT 18.06 선형대수학 (Linear Algebra)", "url": "https://www.youtube.com/playlist?list=PLE7DDD91010BC51F8", "desc": "전설적인 교수 Gilbert Strang의 강의로 행렬 연산과 벡터 공간의 바이블"},
+            {"id": str(uuid.uuid4()), "category": "🏛️ MIT OpenCourseWare", "title": "MIT 6.1200J 컴퓨터 과학을 위한 수학", "url": "https://www.youtube.com/playlist?list=PLUl4u3cNGP61VNvICqk2HXJTonnKgAc9d", "desc": "논리, 증명, 집합론, 그래프 이론 등 컴퓨터 과학의 뼈대가 되는 수학 강의"},
+
+            # 만사침사록
+            {"id": str(uuid.uuid4()), "category": "🇨🇳 만사침사록 (Meditation Math)", "title": "漫士数学 플레이리스트", "url": "https://www.youtube.com/playlist?list=PLShBlXb7zxehR3ebOvob3_S01lPepc84-", "desc": "인공신경망, 딥러닝, 기하학적 통찰 등 깊이 있는 수학적 개념을 직관적으로 탐구하는 시리즈"},
+
+            # Mathemaniac
+            {"id": str(uuid.uuid4()), "category": "📐 Mathemaniac", "title": "Essence of complex analysis", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_UDdkQ3KQjX5SRQ2DLLwv0R", "desc": "복소해석학의 핵심 원리를 명쾌하고 아름답게 시각화한 시리즈"},
+            {"id": str(uuid.uuid4()), "category": "📐 Mathemaniac", "title": "Traditional topics, explained in a new way", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_WVum1CMO9hMSIa7TyrGjsK", "desc": "기존의 수학 주제들을 완전히 새로운 시각과 방법으로 풀어낸 플레이리스트"},
+            {"id": str(uuid.uuid4()), "category": "📐 Mathemaniac", "title": "Essence of differential forms", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_XBTtg1vNbsWZbx0WPK09GI", "desc": "미분형식(Differential Forms)의 본질을 직관적으로 이해할 수 있는 고급 수학 시리즈"},
+            {"id": str(uuid.uuid4()), "category": "📐 Mathemaniac", "title": "Essence of Group Theory", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_VuNbn8HiHZKKy59SgnIAeO", "desc": "추상대수학의 기초인 군론(Group Theory)의 개념적 본질을 다루는 시리즈"}
+        ],
         "basic_tags": [
             "대수학", "기하학", "미적분학", "선형대수학",
             "확률", "정수론", "위상수학", "조합론",
@@ -83,6 +103,10 @@ def init_session():
     for link in st.session_state.wiki_links:
         if "id" not in link:
             link["id"] = str(uuid.uuid4())
+
+    for vid in st.session_state.video_playlists:
+        if "id" not in vid:
+            vid["id"] = str(uuid.uuid4())
             
     if "note_text" not in st.session_state:
         st.session_state.note_text = ""
@@ -352,7 +376,7 @@ class WikiPage(PageBase):
                 else:
                     st.warning("모두 입력하세요")
 
-# ---------- 페이지 3: 추천 강의 (3B1B, MIT, 만사침사록, Mathemaniac) ----------
+# ---------- 페이지 3: 추천 강의 (동적 추가 기능 포함) ----------
 class VideoPage(PageBase):
     def __init__(self):
         super().__init__("📺 추천 강의", "📺")
@@ -361,87 +385,52 @@ class VideoPage(PageBase):
         st.header(f"{self.icon} 추천 수학 강의 영상")
         st.caption("전 세계 최고 수준의 수학 시각화 및 대학원/교양 채널들을 만나보세요.")
         
-        tab1, tab2, tab3, tab4 = st.tabs([
-            "🔵 3Blue1Brown", 
-            "🏛️ MIT OpenCourseWare", 
-            "🇨🇳 만사침사록 (Meditation Math)", 
-            "📐 Mathemaniac"
-        ])
+        # 동적으로 카테고리 추출
+        categories = list(set([v["category"] for v in st.session_state.video_playlists]))
+        categories.sort()
         
-        with tab1:
-            st.subheader("🎨 3Blue1Brown 핵심 시리즈")
-            b3b1_videos = [
-                {"title": "선형대수의 본질 (Essence of linear algebra)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab", "desc": "벡터, 행렬, 선형 변환의 기하학적 직관을 애니메이션으로 완벽히 이해하는 시리즈"},
-                {"title": "미적분학의 본질 (Essence of calculus)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr", "desc": "도미노처럼 이어지는 미분과 적분의 개념적 본질을 명쾌하게 해설"},
-                {"title": "신경망이란 무엇인가? (Neural Networks)", "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi", "desc": "딥러닝과 인공신경망의 수학적 원리를 시각적으로 파헤치는 입문 강의"}
-            ]
-            for v in b3b1_videos:
-                with st.container(border=True):
-                    c1, c2 = st.columns([3, 1])
-                    with c1:
-                        st.markdown(f"### {v['title']}")
-                        st.write(v['desc'])
-                    with c2:
-                        st.markdown(f"[🔗 재생목록 보기]({v['url']})")
-                        if st.button("🤖 AI에게 질문", key=f"b3b_{v['title']}"):
-                            st.session_state.ai_prompt = f"3Blue1Brown의 다음 강의 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
-                            st.toast("AI 조교 탭으로 전송되었습니다!")
+        tabs = st.tabs(categories)
+        
+        for idx, cat in enumerate(categories):
+            with tabs[idx]:
+                st.subheader(f"📂 {cat}")
+                filtered_vids = [v for v in st.session_state.video_playlists if v["category"] == cat]
+                for v in filtered_vids:
+                    with st.container(border=True):
+                        c1, c2 = st.columns([3, 1])
+                        with c1:
+                            st.markdown(f"### {v['title']}")
+                            st.write(v['desc'])
+                        with c2:
+                            st.markdown(f"[🔗 재생목록 보기]({v['url']})")
+                            if st.button("🤖 AI에게 질문", key=f"vid_q_{v['id']}"):
+                                st.session_state.ai_prompt = f"수학 강의 영상/플레이리스트에 대해 설명해줘: {v['title']} ({v['desc']})"
+                                st.toast("AI 조교 탭으로 전송되었습니다!")
 
-        with tab2:
-            st.subheader("🎓 MIT OpenCourseWare 수학 명강의")
-            mit_videos = [
-                {"title": "MIT 18.01 싱글 변수 미적분학 (Single Variable Calculus)", "url": "https://www.youtube.com/playlist?list=PLDespKuFfdEFt7xwMPgljQxX3gXy0p4oB", "desc": "미국 MIT의 정통 미적분학 강의로 극한, 도미노 미분법, 적분 응용을 깊이 있게 다룸"},
-                {"title": "MIT 18.06 선형대수학 (Linear Algebra)", "url": "https://www.youtube.com/playlist?list=PLE7DDD91010BC51F8", "desc": "전설적인 교수 Gilbert Strang의 강의로 행렬 연산과 벡터 공간의 바이블"},
-                {"title": "MIT 6.1200J 컴퓨터 과학을 위한 수학 (Mathematics for Computer Science)", "url": "https://www.youtube.com/playlist?list=PLUl4u3cNGP61VNvICqk2HXJTonnKgAc9d", "desc": "논리, 증명, 집합론, 그래프 이론 등 컴퓨터 과학의 뼈대가 되는 수학 강의"}
-            ]
-            for v in mit_videos:
-                with st.container(border=True):
-                    c1, c2 = st.columns([3, 1])
-                    with c1:
-                        st.markdown(f"### {v['title']}")
-                        st.write(v['desc'])
-                    with c2:
-                        st.markdown(f"[🔗 강의 시청하기]({v['url']})", unsafe_allow_html=True)
-                        if st.button("🤖 AI에게 질문", key=f"mit_{v['title']}"):
-                            st.session_state.ai_prompt = f"MIT 수학 강의 내용에 대해 설명해줘: {v['title']} ({v['desc']})"
-                            st.toast("AI 조교 탭으로 전송되었습니다!")
-
-        with tab3:
-            st.subheader("🇨🇳 만사침사록 (Meditation Math) 플레이리스트")
-            manshi_videos = [
-                {"title": "漫士数学 플레이리스트 (Meditation Math)", "url": "https://www.youtube.com/playlist?list=PLShBlXb7zxehR3ebOvob3_S01lPepc84-", "desc": "인공신경망, 딥러닝, 기하학적 통찰 등 깊이 있는 수학적 개념을 직관적으로 탐구하는 시리즈"}
-            ]
-            for v in manshi_videos:
-                with st.container(border=True):
-                    c1, c2 = st.columns([3, 1])
-                    with c1:
-                        st.markdown(f"### {v['title']}")
-                        st.write(v['desc'])
-                    with c2:
-                        st.markdown(f"[🔗 재생목록 보기]({v['url']})")
-                        if st.button("🤖 AI에게 질문", key=f"manshi_{v['title']}"):
-                            st.session_state.ai_prompt = f"만사침사록의 수학/AI 콘텐츠 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
-                            st.toast("AI 조교 탭으로 전송되었습니다!")
-
-        with tab4:
-            st.subheader("📐 Mathemaniac 플레이리스트")
-            mathemaniac_videos = [
-                {"title": "Essence of complex analysis", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_UDdkQ3KQjX5SRQ2DLLwv0R", "desc": "복소해석학의 핵심 원리를 명쾌하고 아름답게 시각화한 시리즈"},
-                {"title": "Traditional topics, explained in a new way", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_WVum1CMO9hMSIa7TyrGjsK", "desc": "기존의 수학 주제들을 완전히 새로운 시각과 방법으로 풀어낸 플레이리스트"},
-                {"title": "Essence of differential forms", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_XBTtg1vNbsWZbx0WPK09GI", "desc": "미분형식(Differential Forms)의 본질을 직관적으로 이해할 수 있는 고급 수학 시리즈"},
-                {"title": "Essence of Group Theory", "url": "https://www.youtube.com/playlist?list=PLDcSwjT2BF_VuNbn8HiHZKKy59SgnIAeO", "desc": "추상대수학의 기초인 군론(Group Theory)의 개념적 본질을 다루는 시리즈"}
-            ]
-            for v in mathemaniac_videos:
-                with st.container(border=True):
-                    c1, c2 = st.columns([3, 1])
-                    with c1:
-                        st.markdown(f"### {v['title']}")
-                        st.write(v['desc'])
-                    with c2:
-                        st.markdown(f"[🔗 재생목록 보기]({v['url']})")
-                        if st.button("🤖 AI에게 질문", key=f"mathemaniac_{v['title']}"):
-                            st.session_state.ai_prompt = f"Mathemaniac 채널의 다음 강의 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
-                            st.toast("AI 조교 탭으로 전송되었습니다!")
+        st.divider()
+        st.subheader("➕ 새로운 강의 / 재생목록 동적 추가")
+        with st.container(border=True):
+            c1, c2 = st.columns(2)
+            with c1:
+                new_cat = st.text_input("카테고리 이름 (예: 🔵 3Blue1Brown, 혹은 새로운 채널명)", placeholder="새 채널명 또는 기존 카테고리 선택/입력")
+                new_title = st.text_input("강의/플레이리스트 제목", placeholder="예: Essence of Linear Algebra")
+            with c2:
+                new_url = st.text_input("유튜브 링크 (URL)", placeholder="https://www.youtube.com/playlist?list=...")
+                new_desc = st.text_input("간단한 설명", placeholder="어떤 내용을 다루는지 적어주세요")
+            
+            if st.button("🚀 재생목록 자동 추가하기", use_container_width=True):
+                if new_cat and new_title and new_url:
+                    st.session_state.video_playlists.append({
+                        "id": str(uuid.uuid4()),
+                        "category": new_cat,
+                        "title": new_title,
+                        "url": new_url,
+                        "desc": new_desc if new_desc else "추가된 강의 플레이리스트입니다."
+                    })
+                    st.success("새로운 강의 플레이리스트가 성공적으로 추가되었습니다!")
+                    st.rerun()
+                else:
+                    st.warning("카테고리, 제목, URL은 필수 입력 항목입니다.")
 
 # ---------- 페이지 4: AI 대화 ----------
 class AIChatPage(PageBase):
