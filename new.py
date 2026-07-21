@@ -1,13 +1,12 @@
 import streamlit as st
 from openai import OpenAI
 
-ai_client = OpenAI(api_key=st.secrets["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"])
-
+ai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 def page_ai_coach():
     st.header("AI코치와 대화하기")
     prompt = st.text_input("질문을 입력하세요")
     if st.button("보내기"):
-        reseponse = ai_client.reseponses.create(
+        response = ai_client.responses.create(
             model="gpt-5.4-mini",
             input=prompt
         )
