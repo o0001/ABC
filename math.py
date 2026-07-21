@@ -92,26 +92,26 @@ def safe_image_to_base64(image_file):
         return None
     return base64.b64encode(image_file.read()).decode("utf-8")
 
-# ---------- LaTeX 심볼 도우미 (Raw String r"" 적용) ----------
+# ---------- LaTeX 심볼 도우미 (앞뒤로 $ 기호 추가) ----------
 def latex_symbol_buttons(target_key="note_text"):
     cols = st.columns(5)
     symbols = [
-        ("분수", r"\frac{a}{b}"),
-        ("제곱근", r"\sqrt{x}"),
-        ("적분", r"\int_{a}^{b}"),
-        ("합", r"\sum_{i=1}^{n}"),
-        ("극한", r"\lim_{x\to\infty}"),
-        ("행렬", r"\begin{pmatrix}a & b\\ c & d\end{pmatrix}"),
-        ("미분", r"\frac{d}{dx}"),
-        ("편미분", r"\partial"),
-        ("무한대", r"\infty"),
-        ("화살표", r"\rightarrow"),
-        ("시그마", r"\sigma"),
-        ("델타", r"\Delta"),
-        ("파이", r"\pi"),
-        ("세타", r"\theta"),
-        ("람다", r"\lambda"),
-        ("오메가", r"\omega"),
+        ("분수", r"$\frac{a}{b}$"),
+        ("제곱근", r"$\sqrt{x}$"),
+        ("적분", r"$\int_{a}^{b}$"),
+        ("합", r"$\sum_{i=1}^{n}$"),
+        ("극한", r"$\lim_{x\to\infty}$"),
+        ("행렬", r"$\begin{pmatrix}a & b\\ c & d\end{pmatrix}$"),
+        ("미분", r"$\frac{d}{dx}$"),
+        ("편미분", r"$\partial$"),
+        ("무한대", r"$\infty$"),
+        ("화살표", r"$\rightarrow$"),
+        ("시그마", r"$\sigma$"),
+        ("델타", r"$\Delta$"),
+        ("파이", r"$\pi$"),
+        ("세타", r"$\theta$"),
+        ("람다", r"$\lambda$"),
+        ("오메가", r"$\omega$"),
     ]
     for i, (name, code) in enumerate(symbols):
         with cols[i % 5]:
