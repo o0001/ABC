@@ -7,7 +7,7 @@ def page_ai_coach():
     st.header("AI코치와 대화하기")
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "system", "content":"ㅓㄴ는 사용자의 할 일 목록과 달성정도를 분석하여 조연하는 열정적인 코치야, 사용자가 더 멋진 삶을할 수 이쑈도록 멸화학 조연과 응원해줘. "}
+            {"role": "system", "content":"너는 사용자의 할 일 목록과 달성정도를 분석하여 조연하는 열정적인 코치야, 사용자가 더 멋진 삶을할 수 이쑈도록 멸화학 조연과 응원해줘. "}
         ]
     prompt = st.text_input("질문을 입력하세요")
     if st.button("보내기"):
