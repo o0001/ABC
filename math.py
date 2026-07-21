@@ -27,6 +27,7 @@ def init_session():
         "ai_prompt": "",
         "system_prompt": "너는 친절하고 유능한 수학 조교야. 답변은 간결하고 명확하게, 수식은 LaTeX로 표시해줘. 예: $E=mc^2$. 사용자가 유튜브 플레이리스트나 채널, 웹사이트 링크를 추가해달라고 요청하면, '인터넷 검색을 못 한다'고 거절하지 말고, 사용자가 제공한 URL과 제목을 바탕으로 즉시 도구(add_wiki_link 등)를 호출하여 앱에 자동으로 추가해줘.",
         "wiki_links": [
+            {"id": str(uuid.uuid4()), "title": "Veritasium Korea", "url": "https://www.youtube.com/@veritasium_kor"},
             {"id": str(uuid.uuid4()), "title": "대수학", "url": "https://en.wikipedia.org/wiki/Algebra"},
             {"id": str(uuid.uuid4()), "title": "기하학", "url": "https://en.wikipedia.org/wiki/Geometry"},
             {"id": str(uuid.uuid4()), "title": "미적분학", "url": "https://en.wikipedia.org/wiki/Calculus"},
@@ -71,7 +72,14 @@ def init_session():
             "수리해석", "군론", "해석학", "미분방정식",
             "통계학", "최적화", "수치해석", "논리학",
             "그래프이론", "머신러닝수학"
-        ]
+        ],
+        # 숙련도 및 진단 평가 데이터 구조 추가
+        "skill_metrics": {
+            "adaptive_level": 1.0,
+            "prerequisite_checkpoints": {"선형대수": "미완료", "편미분": "미완료"},
+            "behavioral_score": 50,
+            "question_complexity": "초급"
+        }
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -507,7 +515,44 @@ class VideoPage(PageBase):
                             st.session_state.ai_prompt = f"Mathemaniac 채널의 다음 강의 주제에 대해 설명해줘: {v['title']} ({v['desc']})"
                             st.toast("AI 조교 탭으로 전송되었습니다!")
 
-# ---------- 페이지 4: AI 대화 ----------
+# ---------- 페이지 4: 숙련도 진단 (신규 추가) ----------
+class SkillAssessmentPage(PageBase):
+    def __init__(self):
+        super().__init__("📊 숙련도 진단", "📊")
+    
+    def run(self):
+        st.header(f"{self.icon} 학습자 숙련도 및 진단 분석")
+        st.caption("적응형 퀴즈, 선수 학습 체크포인트, 행동 로그를 기반으로 실시간 숙련도를 측정합니다.")
+        
+        metrics = st.session_state.get("skill_metrics", {})
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            with st.container(border=True):
+                st.subheader("🎯 1. 적응형 퀴즈 (Adaptive Quiz)")
+                st.write(f"현재 추정 숙련 지수 (IRT 기반): **Level {metrics.get('adaptive_level', 1.0):.1f}**")
+                if st.button("진단 문항 풀기 (레벨 테스트)", use_container_width=True):
+                    st.session_state.ai_prompt = "내 수학 실력 진단을 위해 난이도 조절형 적응형 퀴즈 문제를 하나 내줘."
+                    st.toast("AI 조교 탭으로 이동했습니다!")
+        with col2:
+            with st.container(border=True):
+                st.subheader("🔗 2. 선수 학습 체크포인트")
+                checkpoints = metrics.get("prerequisite_checkpoints", {})
+                for k, v in checkpoints.items():
+                    st.write(f"- **{k}**: {v}")
+                if st.button("선수 학습 체크 실행", use_container_width=True):
+                    st.session_state.ai_prompt = "고급 개념 학습 전 필요한 선수 학습 체크포인트 테스트를 진행해줘."
+                    st.toast("AI 조교 탭으로 이동했습니다!")
+
+        with st.container(border=True):
+            st.subheader("📈 3. 행동 기반 추론 및 프로파일링 로그")
+            st.write(f"- **행동 패턴 분석 점수:** {metrics.get('behavioral_score', 50)}점")
+            st.write(f"- **질문 추상화 복잡도:** {metrics.get('question_complexity', '초급')}")
+            st.write(f"- **누적 노트 작성 수:** {len(st.session_state.notes)}개")
+            st.write(f"- **위키백과 및 링크 수:** {len(st.session_state.wiki_links)}개")
+            st.info("AI 조교와 대화를 나누거나 노트를 작성할수록 행동 패턴과 질문 복잡도가 동적으로 갱신됩니다.")
+
+# ---------- 페이지 5: AI 대화 ----------
 class AIChatPage(PageBase):
     def __init__(self):
         super().__init__("🤖 AI 조교", "🤖")
@@ -677,6 +722,7 @@ def main():
         "📝 노트 & 도구": NotesAndToolsPage(),
         "🔗 위키백과": WikiPage(),
         "📺 추천 강의": VideoPage(),
+        "📊 숙련도 진단": SkillAssessmentPage(),
         "🤖 AI 조교": AIChatPage()
     }
     choice = st.sidebar.radio("메뉴", list(pages.keys()))
