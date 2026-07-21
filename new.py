@@ -57,8 +57,8 @@ def pg3():
             st.session_state.todo_list = []
             st.rerun()
 pg = st.navigation([
-    st.page(pg1, title="오늘의 다짐"), 
-    st.page(pg2, title="오늘의 할 일"),
-    st.page(pg3, title="나의 갓생 지수")
+    st.Page(pg1, title="오늘의 다짐"), 
+    st.Page(pg2, title="오늘의 할 일"),
+    st.Page(pg3, title="나의 갓생 지수")
 ])
 pg.run()
