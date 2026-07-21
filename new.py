@@ -1,6 +1,6 @@
 import streamlit as st
 from openai import OpenAI
-
+OPENAI_API_KEY = "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"
 ai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 def page_ai_coach():
     st.header("AI코치와 대화하기")
@@ -10,7 +10,7 @@ def page_ai_coach():
             model="gpt-5.4-mini",
             input=prompt
         )
-    st.write(response.output_text)
+        st.write(response.output_text)
 if 'motto_updated' not in st.session_state:
     st.session_state.motto_updated = False
 if 'todo_list' not in st.session_state:
