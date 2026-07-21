@@ -7,7 +7,7 @@ def page_ai_coach():
     prompt = st.text_input("질문을 입력하세요")
     if st.button("보내기"):
         reseponse = ai_client.reseponses.create(
-            model="gpt-5.4-mini"
+            model="gpt-5.4-mini",
             input=prompt
         )
 if 'motto_updated' not in st.session_state:
