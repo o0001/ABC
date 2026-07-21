@@ -2,7 +2,6 @@ import streamlit as st
 import openai
 import base64
 from datetime import datetime
-import pandas as pd
 
 # ---------- 页面配置 ----------
 st.set_page_config(page_title="数学学习助手", layout="wide")
