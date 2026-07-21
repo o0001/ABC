@@ -56,8 +56,8 @@ def pg3():
         if st.button("기록 전체 초기화"):
             st.session_state.todo_list = []
             st.rerun()
-pg=([pg1,
-     pg2,
-     pg3
-    ])
-pg.run
+pg = st.navigation([
+    st.page(pg1, title="오늘의 다짐"), 
+    st.page(pg2, title="오늘의 할 일"),
+    st.page(pg3, title="나의 갓생 지수")
+])
