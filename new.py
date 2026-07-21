@@ -29,7 +29,7 @@ def pg1():
         edm()
     if session_state.motto_updated:
         st.success("사로운 좌우명이 등록되었습니다!")
-        st.sessiom_state.motto_updated = 0
+        st.session_state.motto_updated = 0
     st.markdown("---")
 def pg2():
     st.header("✅ 2. 오늘의 할 일")
