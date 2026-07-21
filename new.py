@@ -1,6 +1,6 @@
 import streamlit as st
-from openai import OpenAI
 
+from openai import OpenAI
 ai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 if 'todo_list' not in st.session_state:
@@ -16,8 +16,6 @@ def add_todo():
         st.session_state.todo_list.append([task, False])
         st.toast("할 일이 추가되었습니다!")
         st.session_state.todo_input = ""
-    else:
-        st.toast("할 일을 입력하고 버튼을 눌러주세요!")
 
 @st.dialog("오늘의 다짐 수정")
 def edit_motto():
@@ -40,8 +38,10 @@ def page_motto():
 def page_todo():
     st.header("✅ 2. 오늘의 할 일")
     st.write(f"현재 다짐: **{st.session_state.user_motto}**")
-    st.text_input("추가할 할 일을 입력하세요", key="todo_input")
+    new_todo = st.text_input("추가할 할 일을 입력하세요", key="todo_input")
     st.button("추가하기", on_click=add_todo)
+    if new_todo == "":
+        st.warning("할 일을 입력하고 버튼을 눌러주세요!")
     
     st.markdown("---")
     for i in range(len(st.session_state.todo_list)):
@@ -99,7 +99,7 @@ def page_ai_coach():
             prompt = st.session_state.messages + [{"role": "system", "content": status_context}]
             with st.spinner("AI 코치가 생각 중...🤔"):
                 response = ai_client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="gpt-5.4-mini",
                     messages=prompt)
                 ai_response = response.choices[0].message.content
                 st.markdown(ai_response)
