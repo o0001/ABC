@@ -453,7 +453,13 @@ class VideoPage(PageBase):
     def run(self):
         st.header(f"{self.icon} 추천 수학 강의 영상")
         st.caption("전 세계 최고 수준의 수학 시각화 및 대학원/교양 채널들을 만나보세요.")
-        tab1, tab2, tab3, tab4 = st.tabs(["🔵 3Blue1Brown", "🏛️ MIT OCW", "🇨🇳 만사침사록", "📐 Mathemaniac"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "🔵 3Blue1Brown", 
+        "🏛️ MIT OCW", 
+        "🇨🇳 만사침사록", 
+        "📐 Mathemaniac",
+        "🔬 Veritasium"   # 新增
+    ])
         # 各tab内容与原代码相同（略，但将在这里完整写出）
         with tab1:
             st.subheader("🎨 3Blue1Brown 핵심 시리즈")
@@ -519,6 +525,22 @@ class VideoPage(PageBase):
                         st.markdown(f"[재생목록]({url})")
                         if st.button("🤖 AI에게 질문", key=f"mathe_{title}"):
                             st.session_state.ai_prompt = f"Mathemaniac 강의 {title} 설명해줘 ({url})"
+                            st.toast("AI 조교로 전송")
+        with tab5:
+            st.subheader("🔬 Veritasium (真理元素)")
+            videos = [
+                ("Veritasium 主频道", "https://www.youtube.com/@veritasium"),
+                ("Veritasium 数学相关播放列表", "https://www.youtube.com/playlist?list=PLkahZjV5wKe-Z1RP3ZiYwe8JSAolmqF9M"),
+            ]
+            for title, url in videos:
+                with st.container(border=True):
+                    c1, c2 = st.columns([3, 1])
+                    with c1:
+                        st.markdown(f"**{title}**")
+                    with c2:
+                        st.markdown(f"[바로가기]({url})")
+                        if st.button("🤖 AI에게 질문", key=f"veritasium_{title}"):
+                            st.session_state.ai_prompt = f"Veritasium 채널의 {title} 내용에 대해 설명해줘 ({url})"
                             st.toast("AI 조교로 전송")
 
 class SkillAssessmentPage(PageBase):
