@@ -624,7 +624,7 @@ class AIChatPage(PageBase):
                     try:
                         client = openai.OpenAI(api_key=openai.api_key)
                         response = client.chat.completions.create(
-                            model="gpt-4o",
+                            model="gpt_5.4_mini",
                             messages=st.session_state.messages,
                             tools=tools,
                             tool_choice="auto",
