@@ -17,7 +17,7 @@ def edm():
     motto = st.text_input("나의 한 줄 좌우명을 적어주세요")
     if st.button("다짐저장"):
         st.session_state.user_motto = motto
-        st.session_state.motto_update = 1
+        st.session_state.motto_update = True
         st.rerun()
 
 def pg1():
@@ -29,7 +29,7 @@ def pg1():
         edm()
     if session_state.motto_updated:
         st.success("사로운 좌우명이 등록되었습니다!")
-        st.session_state.motto_updated = 0
+        st.session_state.motto_updated = False
     st.markdown("---")
 def pg2():
     st.header("✅ 2. 오늘의 할 일")
