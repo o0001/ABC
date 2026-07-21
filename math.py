@@ -528,8 +528,8 @@ class VideoPage(PageBase):
         with tab5:
             st.subheader("🔬 Veritasium (真理元素)")
             videos = [
-                ("Veritasium 主频道", "https://www.youtube.com/@veritasium"),
-                ("Veritasium 数学相关播放列表", "https://www.youtube.com/playlist?list=PLkahZjV5wKe-Z1RP3ZiYwe8JSAolmqF9M"),
+                ("Veritasium ", "https://www.youtube.com/@veritasium"),
+                ("Veritasium - math", "https://www.youtube.com/playlist?list=PLkahZjV5wKe-Z1RP3ZiYwe8JSAolmqF9M"),
             ]
             for title, url in videos:
                 with st.container(border=True):
