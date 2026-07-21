@@ -19,6 +19,7 @@ class PageBase(ABC):
         pass
 
 # ---------- 세션 초기화 ----------
+# ---------- 세션 초기화 ----------
 def init_session():
     defaults = {
         "notes": [],
@@ -42,6 +43,11 @@ def init_session():
     for note in st.session_state.notes:
         if "id" not in note:
             note["id"] = str(uuid.uuid4())
+            
+    # 위키 링크 데이터에 id가 누락된 경우 안전하게 추가
+    for link in st.session_state.wiki_links:
+        if "id" not in link:
+            link["id"] = str(uuid.uuid4())
             
     # 노트 입력용 텍스트 상태 (세션에 없으면 생성)
     if "note_text" not in st.session_state:
