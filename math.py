@@ -360,7 +360,9 @@ class AIChatPage(PageBase):
                 
                 with st.spinner("생각 중..."):
                     try:
-                        resp = openai.ChatCompletion.create(
+                        # 수정 후 (최신 v1.0.0+ 호환 코드)
+                        client = openai.OpenAI(api_key=openai.api_key)
+                        resp = client.chat.completions.create(
                             model="gpt-4o",
                             messages=st.session_state.messages,
                             max_tokens=1024,
