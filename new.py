@@ -10,6 +10,7 @@ def page_ai_coach():
             model="gpt-5.4-mini",
             input=prompt
         )
+    st.write(response.output_text)
 if 'motto_updated' not in st.session_state:
     st.session_state.motto_updated = False
 if 'todo_list' not in st.session_state:
