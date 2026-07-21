@@ -17,7 +17,15 @@ class PageBase(ABC):
     @abstractmethod
     def run(self):
         pass
-
+#-------- somewhere above it---------------
+def render_markdown_latex_preview(text):
+    """
+    Render Markdown + LaTeX preview.
+    Streamlit automatically supports:
+    $inline math$
+    $$block math$$
+    """
+    st.markdown(text)
 # ---------- 세션 초기화 ----------
 def init_session():
     defaults = {
@@ -135,20 +143,37 @@ class NotesAndToolsPage(PageBase):
             st.subheader("✍️ 새 노트")
             st.caption("버튼을 클릭해 LaTeX 기호를 쉽게 입력하세요")
             latex_symbol_buttons("note_text")   # note_text 상태에 추가
-            
-            col1, col2 = st.columns([3, 1])
+            col1, col2 = st.columns([1, 1])
             with col1:
-                # note_text 상태와 바인딩된 text_area
+                st.subheader("✍️ 작성")
                 st.text_area(
-                    "내용 (Markdown + LaTeX)",
+                    "Markdown + LaTeX",
                     key="note_text",
-                    height=150,
-                    placeholder="예: $E=mc^2$, $\\sum_{k=1}^n k = n(n+1)/2$"
+                    height=250,
+                    placeholder="""
+            # 제목
+            
+            피타고라스 정리:
+            
+            $$a^2+b^2=c^2$$
+            
+            미분 예:
+            
+            $f'(x)=2x$
+            """
                 )
+            
             with col2:
-                img = st.file_uploader("이미지", type=["png","jpg","jpeg"], label_visibility="collapsed", key="new_note_img")
-                if img:
-                    st.image(img, width=120)
+                st.subheader("👀 실시간 미리보기")
+            
+                preview = st.session_state.get("note_text", "")
+            
+                if preview.strip():
+                    with st.container(border=True):
+                        st.markdown(preview)
+                else:
+                    st.info("왼쪽에 입력하면 여기에 표시됩니다.")
+
             
             tags = st.multiselect("기본 태그", st.session_state.basic_tags, default=[], placeholder="선택")
             custom_tags = st.text_input("사용자 태그 (쉼표)", placeholder="공식, 정리")
