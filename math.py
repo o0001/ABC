@@ -346,7 +346,7 @@ class AIChatPage(PageBase):
             with st.spinner("🤔 생각 중..."):
                 try:
                     response = openai.ChatCompletion.create(
-                        model="gpt-4o",
+                        model="gpt-5.4-mini",
                         messages=st.session_state.messages,
                         max_tokens=1024,
                         temperature=0.7
