@@ -453,14 +453,13 @@ class VideoPage(PageBase):
     def run(self):
         st.header(f"{self.icon} 추천 수학 강의 영상")
         st.caption("전 세계 최고 수준의 수학 시각화 및 대학원/교양 채널들을 만나보세요.")
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "🔵 3Blue1Brown", 
-        "🏛️ MIT OCW", 
-        "🇨🇳 만사침사록", 
-        "📐 Mathemaniac",
-        "🔬 Veritasium"   # 新增
-    ])
-        # 各tab内容与原代码相同（略，但将在这里完整写出）
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "🔵 3Blue1Brown", 
+            "🏛️ MIT OCW", 
+            "🇨🇳 만사침사록", 
+            "📐 Mathemaniac",
+            "🔬 Veritasium"   # 新增
+        ])
         with tab1:
             st.subheader("🎨 3Blue1Brown 핵심 시리즈")
             videos = [
