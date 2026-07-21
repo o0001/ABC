@@ -1,5 +1,5 @@
 import streamlit as st
-
+OPENAI_API_KEY = "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"
 from openai import OpenAI
 ai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
