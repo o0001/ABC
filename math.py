@@ -154,13 +154,15 @@ tools = [
     }
 ]
 
-def execute_tool_call(tool_call):
-    name = tool_call.function.name
-    args = json.loads(tool_call.function.arguments)
-    
+def execute_tool_call(name, args_str):
+    try:
+        args = json.loads(args_str)
+    except:
+        args = {}
+        
     if name == "add_wiki_link":
-        title = args.get("title")
-        url = args.get("url")
+        title = args.get("title", "제목 없음")
+        url = args.get("url", "")
         st.session_state.wiki_links.append({
             "id": str(uuid.uuid4()),
             "title": title,
@@ -169,7 +171,7 @@ def execute_tool_call(tool_call):
         return f"성공적으로 '{title}' 링크가 위키 목록에 추가되었습니다!"
         
     elif name == "add_note":
-        text = args.get("text")
+        text = args.get("text", "")
         tags = args.get("tags", ["AI생성"])
         st.session_state.notes.append({
             "id": str(uuid.uuid4()),
@@ -520,19 +522,28 @@ class AIChatPage(PageBase):
         if prompt:
             st.info(f"📩 {prompt}")
         
+        # 메시지 렌더링 (안전한 파싱)
         for msg in st.session_state.messages:
-            if msg["role"] == "system":
+            role = msg.get("role")
+            if role == "system":
                 continue
-            with st.chat_message(msg["role"]):
-                if isinstance(msg["content"], list):
-                    for part in msg["content"]:
-                        if part["type"] == "text":
-                            st.markdown(part["text"])
-                        elif part["type"] == "image_url":
-                            st.image(part["image_url"]["url"], width=200)
-                else:
-                    if msg["content"]:
-                        st.markdown(msg["content"])
+            
+            content = msg.get("content")
+            if not content and role == "assistant":
+                continue
+                
+            with st.chat_message("user" if role == "user" else "assistant"):
+                if isinstance(content, list):
+                    for part in content:
+                        if isinstance(part, dict):
+                            if part.get("type") == "text":
+                                st.markdown(part.get("text", ""))
+                            elif part.get("type") == "image_url":
+                                url_val = part.get("image_url", {}).get("url", "")
+                                if url_val:
+                                    st.image(url_val, width=200)
+                elif isinstance(content, str):
+                    st.markdown(content)
         
         with st.form("chat_form", clear_on_submit=True):
             col1, col2 = st.columns([5, 1])
@@ -554,8 +565,9 @@ class AIChatPage(PageBase):
                 else:
                     content = user_text.strip()
                 
-                sys_prompt = st.session_state.get("system_prompt", "")
-                if sys_prompt and (len(st.session_state.messages) == 0 or st.session_state.messages[0]["role"] != "system"):
+                # 시스템 프롬프트가 없으면 맨 앞에 추가
+                if not any(m.get("role") == "system" for m in st.session_state.messages):
+                    sys_prompt = st.session_state.get("system_prompt", "너는 친절한 수학 조교야.")
                     st.session_state.messages.insert(0, {"role": "system", "content": sys_prompt})
                 
                 st.session_state.messages.append({"role": "user", "content": content})
@@ -564,7 +576,7 @@ class AIChatPage(PageBase):
                     try:
                         client = openai.OpenAI(api_key=openai.api_key)
                         
-                        # 첫 번째 응답 생성 (Function Calling 허용)
+                        # 첫 번째 API 요청
                         response = client.chat.completions.create(
                             model="gpt-4o",
                             messages=st.session_state.messages,
@@ -576,19 +588,36 @@ class AIChatPage(PageBase):
                         
                         response_message = response.choices[0].message
                         
-                        # AI가 도구(함수)를 호출하겠다고 결정한 경우
+                        # AI가 도구 호출을 요구한 경우
                         if response_message.tool_calls:
-                            st.session_state.messages.append(response_message)
-                            for tool_call in response_message.tool_calls:
-                                tool_result = execute_tool_call(tool_call)
+                            # 1. assistant 메시지 기록 추가 (딕셔너리 형태로 안전하게 변환)
+                            tool_calls_serialized = [
+                                {
+                                    "id": tc.id,
+                                    "type": tc.type,
+                                    "function": {
+                                        "name": tc.function.name,
+                                        "arguments": tc.function.arguments
+                                    }
+                                } for tc in response_message.tool_calls
+                            ]
+                            st.session_state.messages.append({
+                                "role": "assistant",
+                                "content": response_message.content,
+                                "tool_calls": tool_calls_serialized
+                            })
+                            
+                            # 2. 각 도구 실행 및 결과 추가
+                            for tc in response_message.tool_calls:
+                                tool_result = execute_tool_call(tc.function.name, tc.function.arguments)
                                 st.session_state.messages.append({
                                     "role": "tool",
-                                    "tool_call_id": tool_call.id,
-                                    "name": tool_call.function.name,
+                                    "tool_call_id": tc.id,
+                                    "name": tc.function.name,
                                     "content": tool_result
                                 })
                             
-                            # 도구 실행 결과를 바탕으로 AI의 최종 답변 생성
+                            # 3. 도구 실행 결과를 포함하여 최종 답변 생성
                             second_response = client.chat.completions.create(
                                 model="gpt-4o",
                                 messages=st.session_state.messages,
@@ -598,7 +627,7 @@ class AIChatPage(PageBase):
                             reply = second_response.choices[0].message.content
                         else:
                             reply = response_message.content
-                        
+                            
                         st.session_state.messages.append({"role": "assistant", "content": reply})
                         st.rerun()
                     except Exception as e:
@@ -644,7 +673,8 @@ def main():
     )
     if new_prompt != st.session_state.system_prompt:
         st.session_state.system_prompt = new_prompt
-        if st.session_state.messages and st.session_state.messages[0]["role"] == "system":
+        # 시스템 프롬프트 변경 시 메시지 목록의 첫 번째 항목 업데이트
+        if st.session_state.messages and st.session_state.messages[0].get("role") == "system":
             st.session_state.messages[0]["content"] = new_prompt
     
     pages = {
