@@ -1,7 +1,7 @@
 import streamlit as st
 from openai import OpenAI
-OPENAI_API_KEY = "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"
 ai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+OPENAI_API_KEY = "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"
 def page_ai_coach():
     st.header("AI코치와 대화하기")
     prompt = st.text_input("질문을 입력하세요")
