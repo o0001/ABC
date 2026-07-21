@@ -19,7 +19,6 @@ class PageBase(ABC):
         pass
 
 # ---------- 세션 초기화 ----------
-# ---------- 세션 초기화 ----------
 def init_session():
     defaults = {
         "notes": [],
