@@ -61,3 +61,4 @@ pg = st.navigation([
     st.page(pg2, title="오늘의 할 일"),
     st.page(pg3, title="나의 갓생 지수")
 ])
+pg.run()
