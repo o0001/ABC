@@ -60,5 +60,5 @@ pg = st.navigation([
     st.Page(pg1, title="오늘의 다짐"), 
     st.Page(pg2, title="오늘의 할 일"),
     st.Page(pg3, title="나의 갓생 지수")
-],position="bottom")
+],position="top")
 pg.run()
