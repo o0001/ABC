@@ -12,7 +12,7 @@ def page_ai_coach():
     for message in st.session_state.messages:
         if message["role"] != "system":
             with st.chat_message(message["role"]):
-                st.markdown(message[content])
+                st.markdown(message["content"])
     prompt = st.text_input("질문을 입력하세요")
     if st.button("보내기"):
         response = ai_client.responses.create(
